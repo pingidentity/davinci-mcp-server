@@ -1,0 +1,55 @@
+{
+  "name": "davinci-mcp-server",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol (MCP) server for PingIdentity DaVinci",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "davinci-mcp-server": "dist/index.js"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc && chmod +x dist/index.js",
+    "dev": "tsc --watch",
+    "dev:inspect": "mcp-inspector tsx src/index.ts",
+    "inspect": "mcp-inspector node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"{src,tests}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,tests}/**/*.ts\" --fix",
+    "format": "prettier --write \"{src,tests}/**/*.ts\"",
+    "format:check": "prettier --check \"{src,tests}/**/*.ts\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "pingidentity",
+    "davinci",
+    "identity",
+    "orchestration"
+  ],
+  "author": "Ping Identity",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.21.0",
+    "@types/node": "^20.19.39",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^4.1.4"
+  }
+}
