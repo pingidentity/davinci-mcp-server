@@ -51,7 +51,7 @@ server.registerTool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('DaVinci MCP server running on stdio');
+  console.log('DaVinci MCP server running on stdio');
 }
 
 // Only run main if this file is executed directly
