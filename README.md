@@ -56,7 +56,7 @@ The server uses OAuth 2.0 Authorization Code flow with PKCE for secure authentic
 
 ## Prerequisites
 
-- **Node.js**: Version 18.0.0 or higher
+- **Node.js**: Version 22.0.0 or higher
 - **PingIdentity Environment**: Access to a PingIdentity environment with DaVinci
 - **Application Configuration**: An OAuth application configured with Authorization Code grant type
 - **User Permissions**: DaVinci Admin Read Only role (recommended)
@@ -209,7 +209,8 @@ Configure `ROOT_DOMAIN` based on your region:
 
 2. **Build Errors**
    - Run `npm ci` to ensure clean dependency installation
-   - Verify Node.js version is 18.0.0 or higher
+   - Verify Node.js version is 22.0.0 or higher
+
    - Check TypeScript compilation with `npm run typecheck`
 
 3. **Connection Issues**
