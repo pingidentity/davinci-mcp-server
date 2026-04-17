@@ -16,47 +16,43 @@
  * limitations under the License.
  */
 
-import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { z } from 'zod';
+import { getCliConfig } from './configs/settings.js';
+import { DavinciMcpServer } from './modules/server.js';
+
+const config = getCliConfig();
+const { verbose } = config;
 
 /**
  * Initialize the MCP server for DaVinci.
  * Using the modern McpServer class which provides a high-level API.
  */
-export const server = new McpServer({
-  name: 'davinci-mcp-server',
-  version: '0.1.0',
+export const server = new DavinciMcpServer(config);
+
+async function cleanup() {
+  if (verbose) console.error('\nShutting down DaVinci MCP server...');
+  try {
+    await server.close();
+  } catch (error) {
+    if (verbose) console.error('\nError during shutdown:', error);
+  }
+  process.exit();
+}
+
+process.stdin.on('close', cleanup);
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
+
+process.on('uncaughtException', (error) => {
+  if (verbose) console.error('Uncaught exception:', error);
+  cleanup();
 });
 
-/**
- * Example tool registration using the recommended registerTool method.
- * This will be expanded with actual DaVinci orchestration tools.
- */
-server.registerTool(
-  'echo',
-  {
-    description: 'A simple echo tool to verify server connectivity',
-    inputSchema: {
-      message: z.string().describe('The message to echo back'),
-    },
-  },
-  async ({ message }) => ({
-    content: [{ type: 'text', text: `Echo: ${message}` }],
-  }),
-);
+process.on('unhandledRejection', (reason, promise) => {
+  if (verbose) console.error('Unhandled promise rejection at:', promise, 'reason:', reason);
+  cleanup();
+});
 
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-}
-
-// Only run main if this file is executed directly
-if (resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1])) {
-  main().catch((error) => {
-    console.error('Fatal error in main():', error);
-    process.exit(1);
-  });
-}
+server.connect().catch((error) => {
+  console.error('Fatal error during startup:', error);
+  cleanup();
+});
