@@ -47,15 +47,14 @@ describe('createToolFilter', () => {
     expect(filter(TOOL_NAMES.HELLO_WORLD_TOOL)).toBe(true);
   });
 
-  // --- includeTools takes precedence over excludeTools ---
+  // --- excludeTools takes precedence over includeTools ---
 
-  it('should give includeTools precedence over excludeTools', () => {
+  it('should give excludeTools precedence over includeTools', () => {
     const filter = createToolFilter({
       includeTools: ['hello_world'],
       excludeTools: ['hello_world'],
     });
-    expect(filter(TOOL_NAMES.HELLO_WORLD_TOOL)).toBe(true);
-    expect(filter('nonexistent_tool' as ToolName)).toBe(false);
+    expect(filter(TOOL_NAMES.HELLO_WORLD_TOOL)).toBe(false);
   });
 
   // --- includeCollections ---
@@ -83,14 +82,14 @@ describe('createToolFilter', () => {
     expect(filter(TOOL_NAMES.HELLO_WORLD_TOOL)).toBe(false);
   });
 
-  // --- includeCollections takes precedence over excludeCollections ---
+  // --- excludeCollections takes precedence over includeCollections ---
 
-  it('should give includeCollections precedence over excludeCollections', () => {
+  it('should give excludeCollections precedence over includeCollections', () => {
     const filter = createToolFilter({
       includeCollections: [COLLECTION_NAMES.DAVINCI_ADMIN],
       excludeCollections: [COLLECTION_NAMES.DAVINCI_ADMIN],
     });
-    expect(filter(TOOL_NAMES.HELLO_WORLD_TOOL)).toBe(true);
+    expect(filter(TOOL_NAMES.HELLO_WORLD_TOOL)).toBe(false);
   });
 
   // --- Combined: collection + tool filters ---

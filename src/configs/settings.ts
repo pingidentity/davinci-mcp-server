@@ -18,7 +18,7 @@ import { parseArgs } from 'node:util';
 import { McpServerConfig } from '../types/index.js';
 import { CLI_ARG_OPTIONS, MCP_TOOLS, type ToolName } from '../utils/constants.js';
 
-const TOOL_BY_NAME = new Map(Object.values(MCP_TOOLS).map((tool) => [tool.NAME, tool]));
+const TOOLS_BY_NAME = new Map(Object.values(MCP_TOOLS).map((tool) => [tool.NAME, tool]));
 
 /**
  * Splits a comma-separated string into an array of trimmed, non-empty values.
@@ -83,10 +83,10 @@ export const getCliConfig = (): McpServerConfig => {
  * based on collection-level and tool-level include/exclude rules.
  *
  * **Filtering precedence:**
- * 1. If `includeCollections` is set, only tools belonging to those collections pass.
- *    Otherwise, if `excludeCollections` is set, tools in those collections are rejected.
- * 2. If `includeTools` is set, only explicitly listed tool names pass.
- *    Otherwise, if `excludeTools` is set, listed tool names are rejected.
+ * 1. If `excludeCollections` is set, tools belonging to those collections are rejected.
+ *    Otherwise, if `includeCollections` is set, only tools in those collections pass.
+ * 2. If `excludeTools` is set, listed tool names are rejected.
+ *    Otherwise, if `includeTools` is set, only explicitly listed tool names pass.
  * 3. If no filters are active, a no-op function returning `true` is returned for
  *    optimal performance (avoids per-tool checks entirely).
  *
@@ -104,30 +104,30 @@ export const getCliConfig = (): McpServerConfig => {
 export const createToolFilter = (
   config: McpServerConfig = {},
 ): ((toolName: ToolName) => boolean) => {
-  const inclCols = new Set(config.includeCollections);
-  const exclCols = new Set(config.excludeCollections);
-  const inclTools = new Set(config.includeTools);
-  const exclTools = new Set(config.excludeTools);
+  const includeCollections = new Set(config.includeCollections);
+  const excludeCollections = new Set(config.excludeCollections);
+  const includeTools = new Set(config.includeTools);
+  const excludeTools = new Set(config.excludeTools);
 
-  const hasCollectionFilter = inclCols.size > 0 || exclCols.size > 0;
-  const hasToolFilter = inclTools.size > 0 || exclTools.size > 0;
+  const hasCollectionFilter = includeCollections.size > 0 || excludeCollections.size > 0;
+  const hasToolFilter = includeTools.size > 0 || excludeTools.size > 0;
 
   // No filters active — every tool is included
   if (!hasCollectionFilter && !hasToolFilter) return () => true;
 
   return (toolName: ToolName): boolean => {
-    const toolCollections = TOOL_BY_NAME.get(toolName)?.COLLECTION_NAMES ?? [];
+    const toolCollections = TOOLS_BY_NAME.get(toolName)?.COLLECTION_NAMES ?? [];
 
-    // Collection-based filtering (include takes precedence over exclude)
-    if (inclCols.size > 0) {
-      if (!toolCollections.some((c) => inclCols.has(c))) return false;
-    } else if (exclCols.size > 0) {
-      if (toolCollections.some((c) => exclCols.has(c))) return false;
+    // Collection-based filtering (exclude takes precedence over include)
+    if (excludeCollections.size > 0) {
+      if (toolCollections.some((c) => excludeCollections.has(c))) return false;
+    } else if (includeCollections.size > 0) {
+      if (!toolCollections.some((c) => includeCollections.has(c))) return false;
     }
 
-    // Tool-based filtering (include takes precedence over exclude)
-    if (inclTools.size > 0) return inclTools.has(toolName);
-    if (exclTools.size > 0) return !exclTools.has(toolName);
+    // Tool-based filtering (exclude takes precedence over include)
+    if (excludeTools.size > 0) return !excludeTools.has(toolName);
+    if (includeTools.size > 0) return includeTools.has(toolName);
     return true;
   };
 };
