@@ -16,7 +16,9 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpServerConfig } from '../types/index.js';
-import { registerHelloWorldTool } from './helloworld.js';
+import { registerFlowTools } from './flows.js';
+import { AuthManager } from '../modules/auth/manager.js';
+import { Logger } from '../utils/logger.js';
 
 /**
  * Registers all available MCP tools with the server.
@@ -28,9 +30,17 @@ import { registerHelloWorldTool } from './helloworld.js';
  * New tools should be added here by calling their `register*` function.
  *
  * @param server - The {@link McpServer} instance to register tools on.
- * @param config - Optional server configuration for tool filtering and logging. Defaults to `{}`.
+ * @param config - Server configuration for tool filtering and logging.
+ * @param authManager - Authentication manager for tools requiring API access.
+ * @param logger - Logger instance for status messages.
  */
-export function registerAllTools(server: McpServer, config: McpServerConfig = {}) {
-  registerHelloWorldTool(server, config);
-  if (config.verbose) console.error('[Tools] Tool registration complete.');
+export function registerAllTools(
+  server: McpServer,
+  config: McpServerConfig,
+  authManager: AuthManager,
+  logger: Logger,
+) {
+  registerFlowTools(server, config, authManager, logger);
+
+  logger.info('[Tools] Tool registration complete.');
 }

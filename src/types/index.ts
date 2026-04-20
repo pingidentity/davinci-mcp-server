@@ -14,11 +14,24 @@
  * limitations under the License.
  */
 
+import { AuthConfig } from './auth/manager.js';
+
+/**
+ * Configuration options for the DaVinci MCP server.
+ */
 export interface McpServerConfig {
+  /** List of tool collection names to include. */
   includeCollections?: string[];
+  /** List of tool collection names to exclude. */
   excludeCollections?: string[];
+  /** List of specific tool names to include. */
   includeTools?: string[];
+  /** List of specific tool names to exclude. */
   excludeTools?: string[];
+  /** Whether to enable verbose logging. */
   verbose?: boolean;
+  /** Whether to trigger a logout flow on startup. */
   logout?: boolean;
+  /** Authentication configuration (required). */
+  auth: AuthConfig;
 }

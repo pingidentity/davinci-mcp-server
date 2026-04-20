@@ -1,3 +1,19 @@
+/**
+ * Copyright 2026 Ping Identity Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference types="node" />
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
@@ -11,11 +27,29 @@ let mockConfig = {
   excludeTools: [] as string[],
   verbose: false,
   logout: false,
+  auth: {
+    clientId: 'test-client-id',
+    environmentId: 'test-env-id',
+    rootDomain: 'pingidentity.com',
+  },
 };
 
 vi.mock('../src/modules/server.js', () => ({
   DavinciMcpServer: vi.fn().mockImplementation(function () {
-    return { close: mockClose, connect: mockConnect };
+    return {
+      close: mockClose,
+      connect: mockConnect,
+      getLogger: vi.fn().mockReturnValue({
+        info: (msg: string, ...args: unknown[]) => {
+          if (mockConfig.verbose) console.error(`[INFO] ${msg}`, ...args);
+        },
+        warn: (msg: string, ...args: unknown[]) => console.error(`[WARN] ${msg}`, ...args),
+        error: (msg: string, ...args: unknown[]) => console.error(`[ERROR] ${msg}`, ...args),
+        debug: (msg: string, ...args: unknown[]) => {
+          if (mockConfig.verbose) console.error(`[DEBUG] ${msg}`, ...args);
+        },
+      }),
+    };
   }),
 }));
 
@@ -44,6 +78,11 @@ describe('davinci-mcp-server', () => {
       excludeTools: [],
       verbose: false,
       logout: false,
+      auth: {
+        clientId: 'test-client-id',
+        environmentId: 'test-env-id',
+        rootDomain: 'pingidentity.com',
+      },
     };
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -125,7 +164,7 @@ describe('davinci-mcp-server', () => {
     await import('../src/index.js');
     process.emit('SIGINT');
     await vi.waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('\nShutting down DaVinci MCP server...');
+      expect(consoleSpy).toHaveBeenCalledWith('[INFO] Shutting down DaVinci MCP server...');
       expect(processExitSpy).toHaveBeenCalled();
     });
   });
@@ -136,7 +175,7 @@ describe('davinci-mcp-server', () => {
     await vi.waitFor(() => {
       expect(processExitSpy).toHaveBeenCalled();
     });
-    expect(consoleSpy).not.toHaveBeenCalledWith('\nShutting down DaVinci MCP server...');
+    expect(consoleSpy).not.toHaveBeenCalledWith('[INFO] Shutting down DaVinci MCP server...');
   });
 
   it('should still call process.exit() when server.close() throws', async () => {
@@ -155,7 +194,7 @@ describe('davinci-mcp-server', () => {
     await import('../src/index.js');
     process.emit('SIGINT');
     await vi.waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('\nError during shutdown:', error);
+      expect(consoleSpy).toHaveBeenCalledWith('[ERROR] Error during shutdown:', error);
       expect(processExitSpy).toHaveBeenCalled();
     });
   });
@@ -167,7 +206,7 @@ describe('davinci-mcp-server', () => {
     mockConnect.mockRejectedValueOnce(connectError);
     await import('../src/index.js');
     await vi.waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Fatal error during startup:', connectError);
+      expect(consoleSpy).toHaveBeenCalledWith('[ERROR] Fatal error during startup:', connectError);
       expect(processExitSpy).toHaveBeenCalled();
     });
   });

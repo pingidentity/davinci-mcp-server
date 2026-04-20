@@ -53,9 +53,9 @@ const DAVINCI_ADMIN_COLLECTIONS = [COLLECTION_NAMES.DAVINCI_ADMIN] as const;
  * - `COLLECTION_NAMES` — The collections this tool belongs to, used for filtering.
  */
 export const MCP_TOOLS = {
-  HELLO_WORLD_TOOL: {
-    NAME: 'hello_world',
-    DESCRIPTION: 'A sample tool to print a hello world message',
+  LIST_FLOWS: {
+    NAME: 'list_flows',
+    DESCRIPTION: 'List all DaVinci flows in the environment',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
 } as const;
@@ -70,3 +70,13 @@ export const TOOL_NAMES = Object.fromEntries(
 ) as { [K in keyof typeof MCP_TOOLS]: (typeof MCP_TOOLS)[K]['NAME'] };
 
 export type ToolName = (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES];
+
+export const AUTH_PORT = 7474;
+export const REDIRECT_URI = `http://127.0.0.1:${AUTH_PORT}/callback`;
+export const AUTH_TIMEOUT_MS = 300_000;
+export const AUTH_CODE_MAX_LENGTH = 2048;
+
+export const OS_KEYCHAIN = {
+  SERVICE_NAME: 'davinci-mcp-server',
+  ACCOUNT_NAME: 'davinci-tokens',
+} as const;
