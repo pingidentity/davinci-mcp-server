@@ -66,13 +66,34 @@ export const getCliConfig = (): McpServerConfig => {
     strict: false,
   });
 
+  const verbose = !!values[CLI_ARG_OPTIONS.VERBOSE];
+
+  const clientId = process.env.AUTHORIZATION_CODE_CLIENT_ID;
+  const environmentId = process.env.DAVINCI_MCP_ENVIRONMENT_ID;
+  const rootDomain = process.env.ROOT_DOMAIN;
+
+  const missingVars: string[] = [];
+  if (!clientId) missingVars.push('AUTHORIZATION_CODE_CLIENT_ID');
+  if (!environmentId) missingVars.push('DAVINCI_MCP_ENVIRONMENT_ID');
+  if (!rootDomain) missingVars.push('ROOT_DOMAIN');
+
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  }
+
   return {
     includeCollections: splitAndTrim(values[CLI_ARG_OPTIONS.INCLUDE_COLLECTIONS]),
     excludeCollections: splitAndTrim(values[CLI_ARG_OPTIONS.EXCLUDE_COLLECTIONS]),
     includeTools: splitAndTrim(values[CLI_ARG_OPTIONS.INCLUDE_TOOLS]),
     excludeTools: splitAndTrim(values[CLI_ARG_OPTIONS.EXCLUDE_TOOLS]),
-    verbose: !!values[CLI_ARG_OPTIONS.VERBOSE],
+    verbose,
     logout: !!values[CLI_ARG_OPTIONS.LOGOUT],
+    auth: {
+      clientId: clientId!,
+      environmentId: environmentId!,
+      rootDomain: rootDomain!,
+      customDomain: process.env.CUSTOM_DOMAIN,
+    },
   };
 };
 
@@ -102,7 +123,7 @@ export const getCliConfig = (): McpServerConfig => {
  * isIncluded("list_variables"); // false
  */
 export const createToolFilter = (
-  config: McpServerConfig = {},
+  config: Partial<McpServerConfig> = {},
 ): ((toolName: ToolName) => boolean) => {
   const includeCollections = new Set(config.includeCollections);
   const excludeCollections = new Set(config.excludeCollections);

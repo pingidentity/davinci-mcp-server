@@ -20,20 +20,24 @@ import { getCliConfig } from './configs/settings.js';
 import { DavinciMcpServer } from './modules/server.js';
 
 const config = getCliConfig();
-const { verbose } = config;
 
 /**
  * Initialize the MCP server for DaVinci.
  * Using the modern McpServer class which provides a high-level API.
  */
 export const server = new DavinciMcpServer(config);
+const logger = server.getLogger();
 
+/**
+ * Performs cleanup tasks before the process exits.
+ * Closes the MCP server and releases resources.
+ */
 async function cleanup() {
-  if (verbose) console.error('\nShutting down DaVinci MCP server...');
+  logger.info('Shutting down DaVinci MCP server...');
   try {
     await server.close();
   } catch (error) {
-    if (verbose) console.error('\nError during shutdown:', error);
+    logger.error('Error during shutdown:', error);
   }
   process.exit();
 }
@@ -43,16 +47,16 @@ process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);
 
 process.on('uncaughtException', (error) => {
-  if (verbose) console.error('Uncaught exception:', error);
-  cleanup();
+  logger.error('Uncaught exception:', error);
+  void cleanup();
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  if (verbose) console.error('Unhandled promise rejection at:', promise, 'reason:', reason);
-  cleanup();
+  logger.warn('Unhandled promise rejection at:', promise, 'reason:', reason);
+  void cleanup();
 });
 
 server.connect().catch((error) => {
-  console.error('Fatal error during startup:', error);
-  cleanup();
+  logger.error('Fatal error during startup:', error);
+  void cleanup();
 });
