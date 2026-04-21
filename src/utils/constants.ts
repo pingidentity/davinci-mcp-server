@@ -232,6 +232,32 @@ export const MCP_TOOLS = {
                 Do NOT call this just to check status or version — list_flows is sufficient for that.`,
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
+  LIST_FLOW_VERSIONS: {
+    NAME: 'list_flow_versions',
+    DESCRIPTION: `Returns all versions of a specific DaVinci flow by flow ID. Each version entry 
+                includes the version number, alias (human-readable label), the version it was cloned 
+                from (revealing version lineage), and created, updated, and deployed timestamps. 
+                Use when the user wants to browse a flow's version history, check when a version was 
+                deployed, trace how versions were branched from each other via clonedFrom, or find a 
+                version ID before reverting or exporting a specific version. 
+                Requires a flow ID — call list_flows first if unknown. For the full node-level 
+                definition of a specific version, use describe_flow after identifying the target 
+                version number.`,
+    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+  },
+  DESCRIBE_FLOW_VERSION: {
+    NAME: 'describe_flow_version',
+    DESCRIPTION: `Returns the metadata of a single specific version of a DaVinci flow by flow ID 
+                and version ID. The response contains the same fields as list_flow_versions (version 
+                number, alias, clonedFrom for lineage, flow ID and name, and created, updated, and 
+                deployed timestamps) but scoped to one version. This response does NOT include the 
+                full flow graph or node-level details — for that, use describe_flow which returns the 
+                current flow definition. Prefer this over list_flow_versions when both the flow ID and 
+                version ID are already known and only one version is relevant. Requires both a flow ID 
+                and a version ID — call list_flows to find the flow ID, then list_flow_versions to find 
+                the version ID if unknown.`,
+    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+  },
 } as const;
 
 /**
