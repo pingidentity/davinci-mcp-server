@@ -63,7 +63,7 @@ export const MCP_TOOLS = {
                 application ID before calling describe_application. Do NOT use when the user needs flow 
                 policy details for an application — use list_application_flow_policies with the 
                 application ID instead.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_APPLICATION: {
     NAME: 'describe_application',
@@ -75,7 +75,7 @@ export const MCP_TOOLS = {
                 application is relevant. Do NOT use just to look up an application name or ID — 
                 use list_applications for discovery. For flow policies attached to this application, 
                 use list_application_flow_policies with the application ID.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_APPLICATION_FLOW_POLICIES: {
     NAME: 'list_application_flow_policies',
@@ -89,7 +89,7 @@ export const MCP_TOOLS = {
                 Requires an application ID — call list_applications first if unknown. For full details 
                 of a single policy, use describe_application_flow_policy with both the application ID 
                 and policy ID.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_APPLICATION_FLOW_POLICY: {
     NAME: 'describe_application_flow_policy',
@@ -102,7 +102,7 @@ export const MCP_TOOLS = {
                   known and only one policy is relevant. Requires both an application ID and a policy ID — 
                   call list_applications to find the application ID, then list_application_flow_policies 
                   to find the policy ID if unknown.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_VARIABLES: {
     NAME: 'list_variables',
@@ -116,7 +116,7 @@ export const MCP_TOOLS = {
                 variables, or look up a variable name before calling describe_variable. 
                 Do NOT use when the user needs full details of a single known variable — 
                 use describe_variable with the variable ID instead.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_VARIABLE: {
     NAME: 'describe_variable',
@@ -127,19 +127,19 @@ export const MCP_TOOLS = {
                 ID is already known and only one variable is relevant. Note that current value is also 
                 available in list_variables, so only call this when the ID is known and a single variable 
                 is the focus. Requires a variable ID — call list_variables first if unknown.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FORMS: {
     NAME: 'list_forms',
     DESCRIPTION:
       "Returns a summary list of all DaVinci forms in the environment (names, IDs, status). Use when the user asks what forms exist or wants to browse available forms. Follow up with describe_form to inspect a specific form's fields and configuration.",
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FORM: {
     NAME: 'describe_form',
     DESCRIPTION:
       'Returns full configuration of a specific DaVinci form, including fields, layout, validation rules, and metadata. Requires a form ID — call list_forms first if unknown.',
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_CONNECTORS: {
     NAME: 'list_connectors',
@@ -151,7 +151,7 @@ export const MCP_TOOLS = {
                 environment — use list_connector_instances instead. Do NOT use when the user needs 
                 capabilities, properties, or configuration details of a connector — 
                 use get_connector_details with the connector ID instead.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_CONNECTOR: {
     NAME: 'describe_connector',
@@ -162,7 +162,7 @@ export const MCP_TOOLS = {
                 list_connectors for discovery, and only use this when the connector ID is already known 
                 and a lightweight confirmation of name, version, or vendor is needed for a single 
                 connector. Requires a connector ID — call list_connectors first if unknown.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   GET_CONNECTOR_DETAILS: {
     NAME: 'get_connector_details',
@@ -175,7 +175,7 @@ export const MCP_TOOLS = {
                 NOT include basic identity fields like name, version, or vendor — combine with 
                 describe_connector or list_connectors if those are also needed. Requires a connector ID 
                 — call list_connectors first if unknown.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_CONNECTOR_INSTANCES: {
     NAME: 'list_connector_instances',
@@ -191,7 +191,7 @@ export const MCP_TOOLS = {
                 the available capabilities or credential schema of a connector type — 
                 use get_connector_details instead. Requires a connector instance ID for follow-up — 
                 call this first before describe_connector_instance.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_CONNECTOR_INSTANCE: {
     NAME: 'describe_connector_instance',
@@ -204,7 +204,7 @@ export const MCP_TOOLS = {
                 property values are also available in list_connector_instances, so only call this when 
                 the ID is known and a single instance is the focus. Requires a connector instance ID — 
                 call list_connector_instances first if unknown.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FLOWS: {
     NAME: 'list_flows',
@@ -216,7 +216,7 @@ export const MCP_TOOLS = {
                   (compare currentVersion vs publishedVersion), or identifying flows with linter issues. 
                   Do NOT use when the user needs the full node-level logic of a specific flow — 
                   use describe_flow with the flow ID instead.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FLOW: {
     NAME: 'describe_flow',
@@ -230,7 +230,7 @@ export const MCP_TOOLS = {
                 a flow's internal logic, node configuration, connector usage, variable handling, or 
                 routing structure. Requires a flow ID — call list_flows first if unknown. 
                 Do NOT call this just to check status or version — list_flows is sufficient for that.`,
-    COLLECTION_NAMES: [COLLECTION_NAMES.DAVINCI_ADMIN],
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
 } as const;
 
