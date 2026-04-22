@@ -55,87 +55,98 @@ const DAVINCI_ADMIN_COLLECTIONS = [COLLECTION_NAMES.DAVINCI_ADMIN] as const;
 export const MCP_TOOLS = {
   LIST_APPLICATIONS: {
     NAME: 'list_applications',
-    DESCRIPTION: 'Returns a list of all DaVinci applications. Use for discovery and finding application IDs. Use list_application_flow_policies for policy details.',
+    DESCRIPTION:
+      'Returns a list of all DaVinci applications. Use for discovery and finding application IDs. Use list_application_flow_policies for policy details.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_APPLICATION: {
     NAME: 'describe_application',
-    DESCRIPTION: 'Returns details of a single DaVinci application by ID. Use when the application ID is already known. Call list_applications first to find the ID.',
+    DESCRIPTION:
+      'Returns details of a single DaVinci application by ID. Use when the application ID is already known. Call list_applications first to find the ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_APPLICATION_FLOW_POLICIES: {
     NAME: 'list_application_flow_policies',
-    DESCRIPTION: 'Returns all flow policies for a DaVinci application. Use to see which flows are attached to an application and their status. Call list_applications first to find the application ID.',
+    DESCRIPTION:
+      'Returns all flow policies for a DaVinci application. Use to see which flows are attached to an application and their status. Call list_applications first to find the application ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_APPLICATION_FLOW_POLICY: {
     NAME: 'describe_application_flow_policy',
-    DESCRIPTION: 'Returns details of a single flow policy for a DaVinci application. Call list_applications then list_application_flow_policies first to find the required IDs.',
+    DESCRIPTION:
+      'Returns details of a single flow policy for a DaVinci application. Call list_applications then list_application_flow_policies first to find the required IDs.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_VARIABLES: {
     NAME: 'list_variables',
-    DESCRIPTION: 'Returns a list of all DaVinci variables. Use for discovery and finding variable IDs. Results are paginated.',
+    DESCRIPTION:
+      'Returns a list of all DaVinci variables. Use for discovery and finding variable IDs. Results are paginated.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_VARIABLE: {
     NAME: 'describe_variable',
-    DESCRIPTION: 'Returns details of a single DaVinci variable by ID. Call list_variables first to find the ID.',
+    DESCRIPTION:
+      'Returns details of a single DaVinci variable by ID. Call list_variables first to find the ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FORMS: {
     NAME: 'list_forms',
-    DESCRIPTION: 'Returns a list of all DaVinci forms. Use for discovery and finding form IDs. Use describe_form for field-level details.',
+    DESCRIPTION:
+      'Returns a list of all DaVinci forms. Use for discovery and finding form IDs. Use describe_form for field-level details.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FORM: {
     NAME: 'describe_form',
-    DESCRIPTION: 'Returns full configuration of a single DaVinci form including fields and layout. Call list_forms first to find the ID.',
+    DESCRIPTION:
+      'Returns full configuration of a single DaVinci form including fields and layout. Call list_forms first to find the ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_CONNECTORS: {
     NAME: 'list_connectors',
-    DESCRIPTION: 'Returns a list of all available DaVinci connector types from the catalog. Use for discovery and finding connector IDs. Use list_connector_instances for deployed instances; use get_connector_details for capabilities and properties.',
+    DESCRIPTION:
+      'Returns a list of all available DaVinci connector types from the catalog. Use for discovery and finding connector IDs. Use list_connector_instances for deployed instances; use get_connector_details for capabilities and properties.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_CONNECTOR: {
     NAME: 'describe_connector',
-    DESCRIPTION: 'Returns catalog details of a single DaVinci connector type by ID. Does not include capabilities or properties — use get_connector_details for that. Call list_connectors first to find the ID.',
-    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
-  },
-  GET_CONNECTOR_DETAILS: {
-    NAME: 'get_connector_details',
-    DESCRIPTION: 'Returns full capabilities, configurable properties, and required credentials for a DaVinci connector type. Use when you need to understand what a connector can do or how to configure it. Call list_connectors first to find the ID.',
+    DESCRIPTION:
+      'Returns the full details of a single DaVinci connector type by ID, including metadata, capabilities, configurable properties, and required credentials. Call list_connectors first to find the ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_CONNECTOR_INSTANCES: {
     NAME: 'list_connector_instances',
-    DESCRIPTION: 'Returns a list of all deployed DaVinci connector instances in the environment. Use for discovery and finding instance IDs. Do not confuse with list_connectors which returns the connector catalog.',
+    DESCRIPTION:
+      'Returns a list of all deployed DaVinci connector instances in the environment. Use for discovery and finding instance IDs. Do not confuse with list_connectors which returns the connector catalog.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_CONNECTOR_INSTANCE: {
     NAME: 'describe_connector_instance',
-    DESCRIPTION: 'Returns details of a single deployed DaVinci connector instance by ID. Call list_connector_instances first to find the ID.',
+    DESCRIPTION:
+      'Returns details of a single deployed DaVinci connector instance by ID. Call list_connector_instances first to find the ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FLOWS: {
     NAME: 'list_flows',
-    DESCRIPTION: 'Returns a list of all DaVinci flows. Use for discovery, finding flow IDs, and checking deployed vs draft status. Use describe_flow for full node-level graph details.',
+    DESCRIPTION:
+      'Returns a list of all DaVinci flows. Use for discovery, finding flow IDs, and checking deployed vs draft status. Use describe_flow for full node-level graph details.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FLOW: {
     NAME: 'describe_flow',
-    DESCRIPTION: 'Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow\'s internal logic. Call list_flows first to find the ID.',
+    DESCRIPTION:
+      "Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow's internal logic. Call list_flows first to find the ID.",
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FLOW_VERSIONS: {
     NAME: 'list_flow_versions',
-    DESCRIPTION: 'Returns all versions of a specific DaVinci flow. Use to browse version history or find a version ID before reverting or exporting. Call list_flows first to find the flow ID.',
+    DESCRIPTION:
+      'Returns all versions of a specific DaVinci flow. Use to browse version history or find a version ID before reverting or exporting. Call list_flows first to find the flow ID.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FLOW_VERSION: {
     NAME: 'describe_flow_version',
-    DESCRIPTION: 'Returns metadata of a single DaVinci flow version. Does not include the flow graph — use describe_flow for that. Call list_flows then list_flow_versions first to find the required IDs.',
+    DESCRIPTION:
+      'Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Use when you need to inspect or compare a historical version of a flow. Call list_flows then list_flow_versions first to find the required IDs.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
 } as const;
