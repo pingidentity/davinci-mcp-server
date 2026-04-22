@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -49,6 +49,7 @@ describe('registerFlowTools', () => {
   let client: Client;
   let mockAuthManager: AuthManager;
   let logger: Logger;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
   let mockFlowsClient: { listFlows: ReturnType<typeof vi.fn>; getFlow: ReturnType<typeof vi.fn> };
 
   async function setupServerAndClient(config: McpServerConfig) {
@@ -67,6 +68,7 @@ describe('registerFlowTools', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     logger = new Logger(false);
     mockAuthManager = {
       getLogger: vi.fn().mockReturnValue({
@@ -78,6 +80,10 @@ describe('registerFlowTools', () => {
       getRootDomain: vi.fn().mockReturnValue('pingidentity.com'),
       getEnvironmentId: vi.fn().mockReturnValue('test-env-id'),
     } as unknown as AuthManager;
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
   });
 
   // --- Registration ---

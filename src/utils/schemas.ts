@@ -23,6 +23,8 @@ import { z } from 'zod';
 const PARAM_DESCRIPTIONS: Record<string, string> = {
   flowId: 'The ID of the flow',
   versionId: 'The ID of the flow version',
+  connectorId: 'The ID of the connector',
+  instanceId: 'The ID of the connector instance',
 };
 
 /**

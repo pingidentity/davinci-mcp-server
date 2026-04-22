@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import { FlowsClient } from '../../../../src/modules/auth/clients/flows.js';
 import { AuthManager } from '../../../../src/modules/auth/manager.js';
@@ -37,11 +37,13 @@ vi.mock('axios', () => {
 
 describe('FlowsClient', () => {
   let mockAuthManager: AuthManager;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
   let client: FlowsClient;
   let axiosInstance: { get: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockAuthManager = {
       getTokens: vi.fn().mockResolvedValue({ access_token: 'test-token' }),
       getLogger: vi.fn().mockReturnValue({
@@ -56,6 +58,10 @@ describe('FlowsClient', () => {
 
     client = new FlowsClient(mockAuthManager);
     axiosInstance = vi.mocked(axios.create).mock.results[0].value;
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
   });
 
   it('should call GET /flows for listFlows', async () => {
