@@ -80,7 +80,7 @@ export function registerApplicationTools(
       {
         description: MCP_TOOLS.DESCRIBE_APPLICATION.DESCRIPTION,
         inputSchema: z.object({
-          applicationId: requiredId('applicationId', 'The ID of the application'),
+          applicationId: requiredId('applicationId'),
         }),
       },
       async ({ applicationId }) => {
