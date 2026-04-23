@@ -14,29 +14,8 @@
  * limitations under the License.
  */
 
-import { z } from 'zod';
 export const MCP_SERVER_NAME = 'davinci-mcp-server';
 export const MCP_SERVER_VERSION = '0.1.0';
-
-/**
- * Reusable parameter descriptions for MCP tool input schemas,
- * keyed by field name for automatic lookup by {@link requiredId}.
- */
-export const PARAM_DESCRIPTIONS: Record<string, string> = {
-  flowId: 'The ID of the flow',
-  versionId: 'The ID of the flow version',
-};
-
-/**
- * Creates a required, trimmed string Zod schema with a description.
- *
- * @param field - The field name used in the validation error message
- *   and as a lookup key in {@link PARAM_DESCRIPTIONS}.
- * @param description - Optional override. Defaults to the value in
- *   {@link PARAM_DESCRIPTIONS} for the given field.
- */
-export const requiredId = (field: string, description?: string) =>
-  z.string().trim().min(1, `${field} is required`).regex(/^[a-zA-Z0-9_-]+$/, `${field} contains invalid characters`).describe(description ?? PARAM_DESCRIPTIONS[field] ?? field);
 
 /**
  * CLI argument option keys.

@@ -17,7 +17,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS, requiredId } from '../utils/constants.js';
+import { MCP_TOOLS } from '../utils/constants.js';
+import { requiredId } from '../utils/schemas.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FlowVersionsClient } from '../modules/auth/clients/flowVersions.js';
 import { AuthManager } from '../modules/auth/manager.js';
