@@ -29,4 +29,15 @@ export class FlowsClient extends DaVinciApiClient {
     const response = await this.axiosInstance.get('/flows');
     return response.data;
   }
+
+  /**
+   * Retrieves details of a specific flow.
+   *
+   * @param flowId - The ID of the flow to retrieve.
+   * @returns A promise that resolves to the flow details.
+   */
+  async getFlow(flowId: string) {
+    const response = await this.axiosInstance.get(`/flows/${flowId}`);
+    return response.data;
+  }
 }
