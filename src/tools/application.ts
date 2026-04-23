@@ -24,13 +24,6 @@ import { ApplicationsClient } from '../modules/auth/clients/application.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
 
-/**
- * Formats error messages for tool responses.
- */
-function formatError(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 /**
  * Registers application-related MCP tools.
