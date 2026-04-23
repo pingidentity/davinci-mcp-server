@@ -14,52 +14,97 @@
  * limitations under the License.
  */
 
+import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS } from '../utils/constants.js';
+import { MCP_TOOLS, TOOL_NAMES } from '../utils/constants.js';
 import { createToolFilter } from '../configs/settings.js';
 import { ApplicationsClient } from '../modules/auth/clients/application.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
 
 /**
- * Registers flow-related MCP tools.
+ * Formats error messages for tool responses.
+ */
+function formatError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+/**
+ * Registers application-related MCP tools.
  *
  * @param server - The {@link McpServer} instance.
  * @param config - Server configuration for filtering.
  * @param authManager - Authentication manager for API calls.
  * @param logger - Logger instance for status updates.
  */
-export function registerFlowTools(
+export function registerApplicationTools(
   server: McpServer,
   config: McpServerConfig,
   authManager: AuthManager,
   logger: Logger,
 ) {
-  const isIncluded = createToolFilter(config);
+  const isToolIncluded = createToolFilter(config);
+  const client = new ApplicationsClient(authManager);
 
-  if (isIncluded(MCP_TOOLS.LIST_FLOWS.NAME)) {
-    const flowsClient = new ApplicationsClient(authManager);
-    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_APPLICATIONS.NAME}`);
+  if (isToolIncluded(TOOL_NAMES.LIST_APPLICATIONS)) {
+    logger.debug(`[Tools] Registering tool: ${TOOL_NAMES.LIST_APPLICATIONS}`);
     server.registerTool(
-      MCP_TOOLS.LIST_APPLICATIONS.NAME,
+      TOOL_NAMES.LIST_APPLICATIONS,
       {
         description: MCP_TOOLS.LIST_APPLICATIONS.DESCRIPTION,
       },
       async () => {
         try {
-          const flows = await flowsClient.listApplications();
+          const applications = await client.listApplications();
           return {
-            content: [{ type: 'text', text: JSON.stringify(flows, null, 2) }],
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(applications, null, 2),
+              },
+            ],
           };
-        } catch (error) {
-          logger.error(`Error in tool ${MCP_TOOLS.LIST_APPLICATIONS.NAME}:`, error);
-          if (error instanceof McpError) throw error;
-          throw new McpError(
-            ErrorCode.InternalError,
-            `Failed to list applications: ${error instanceof Error ? error.message : String(error)}`,
-          );
+        } catch (error: any) {
+          logger.error(`Error in tool ${TOOL_NAMES.LIST_APPLICATIONS}:`, error);
+          return {
+            content: [{ type: 'text', text: `Error: ${formatError(error)}` }],
+            isError: true,
+          };
+        }
+      },
+    );
+  }
+
+  if (isToolIncluded(TOOL_NAMES.DESCRIBE_APPLICATION)) {
+    logger.debug(`[Tools] Registering tool: ${TOOL_NAMES.DESCRIBE_APPLICATION}`);
+    server.registerTool(
+      TOOL_NAMES.DESCRIBE_APPLICATION,
+      {
+        description: MCP_TOOLS.DESCRIBE_APPLICATION.DESCRIPTION,
+        inputSchema: z.object({
+          applicationId: z.string().describe('The ID of the application'),
+        }),
+      },
+      async ({ applicationId }) => {
+        try {
+          const application = await client.describeApplication(applicationId);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(application, null, 2),
+              },
+            ],
+          };
+        } catch (error: any) {
+          logger.error(`Error in tool ${TOOL_NAMES.DESCRIBE_APPLICATION}:`, error);
+          return {
+            content: [{ type: 'text', text: `Error: ${formatError(error)}` }],
+            isError: true,
+          };
         }
       },
     );
