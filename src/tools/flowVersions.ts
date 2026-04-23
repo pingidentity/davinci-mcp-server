@@ -19,80 +19,84 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
 import { MCP_TOOLS, requiredId } from '../utils/constants.js';
 import { createToolFilter } from '../configs/settings.js';
-import { FlowsClient } from '../modules/auth/clients/flows.js';
+import { FlowVersionsClient } from '../modules/auth/clients/flowVersions.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
 import { z } from 'zod';
 
 /**
- * Registers flow-related MCP tools.
+ * Registers flow version-related MCP tools.
  *
  * @param server - The {@link McpServer} instance.
  * @param config - Server configuration for filtering.
  * @param authManager - Authentication manager for API calls.
  * @param logger - Logger instance for status updates.
  */
-export function registerFlowTools(
+export function registerFlowVersionTools(
   server: McpServer,
   config: McpServerConfig,
   authManager: AuthManager,
   logger: Logger,
 ) {
   const isIncluded = createToolFilter(config);
-  const includeListFlows = isIncluded(MCP_TOOLS.LIST_FLOWS.NAME);
-  const includeDescribeFlow = isIncluded(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+  const includeListVersions = isIncluded(MCP_TOOLS.LIST_FLOW_VERSIONS.NAME);
+  const includeDescribeVersion = isIncluded(MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME);
 
-  if (!includeListFlows && !includeDescribeFlow) return;
+  if (!includeListVersions && !includeDescribeVersion) return;
 
-  const flowsClient = new FlowsClient(authManager);
+  const flowVersionsClient = new FlowVersionsClient(authManager);
 
-  if (includeListFlows) {
-    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_FLOWS.NAME}`);
+  if (includeListVersions) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_FLOW_VERSIONS.NAME}`);
     server.registerTool(
-      MCP_TOOLS.LIST_FLOWS.NAME,
+      MCP_TOOLS.LIST_FLOW_VERSIONS.NAME,
       {
-        description: MCP_TOOLS.LIST_FLOWS.DESCRIPTION,
-      },
-      async () => {
-        try {
-          const flows = await flowsClient.listFlows();
-          return {
-            content: [{ type: 'text', text: JSON.stringify(flows) }],
-          };
-        } catch (error) {
-          logger.error(`Error in tool ${MCP_TOOLS.LIST_FLOWS.NAME}:`, error);
-          if (error instanceof McpError) throw error;
-          throw new McpError(
-            ErrorCode.InternalError,
-            `Failed to list flows: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-      },
-    );
-  }
-
-  if (includeDescribeFlow) {
-    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_FLOW.NAME}`);
-    server.registerTool(
-      MCP_TOOLS.DESCRIBE_FLOW.NAME,
-      {
-        description: MCP_TOOLS.DESCRIBE_FLOW.DESCRIPTION,
+        description: MCP_TOOLS.LIST_FLOW_VERSIONS.DESCRIPTION,
         inputSchema: z.object({
           flowId: requiredId('flowId'),
         }),
       },
       async ({ flowId }) => {
         try {
-          const flow = await flowsClient.getFlow(flowId);
+          const flowVersions = await flowVersionsClient.listFlowVersions(flowId);
           return {
-            content: [{ type: 'text', text: JSON.stringify(flow) }],
+            content: [{ type: 'text', text: JSON.stringify(flowVersions) }],
           };
         } catch (error) {
-          logger.error(`Error in tool ${MCP_TOOLS.DESCRIBE_FLOW.NAME}:`, error);
+          logger.error(`Error in tool ${MCP_TOOLS.LIST_FLOW_VERSIONS.NAME}:`, error);
           if (error instanceof McpError) throw error;
           throw new McpError(
             ErrorCode.InternalError,
-            `Failed to describe flow: ${error instanceof Error ? error.message : String(error)}`,
+            `Failed to list flow versions: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeDescribeVersion) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
+      {
+        description: MCP_TOOLS.DESCRIBE_FLOW_VERSION.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+          versionId: requiredId('versionId'),
+        }),
+      },
+      async ({ flowId, versionId }) => {
+        try {
+          const flowVersion = await flowVersionsClient.getFlowVersion(flowId, versionId);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(flowVersion) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to describe flow version: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
       },

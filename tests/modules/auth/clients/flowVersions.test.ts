@@ -16,7 +16,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
-import { FlowsClient } from '../../../../src/modules/auth/clients/flows.js';
+import { FlowVersionsClient } from '../../../../src/modules/auth/clients/flowVersions.js';
 import { AuthManager } from '../../../../src/modules/auth/manager.js';
 
 vi.mock('axios', () => {
@@ -35,9 +35,9 @@ vi.mock('axios', () => {
   };
 });
 
-describe('FlowsClient', () => {
+describe('FlowVersionsClient', () => {
   let mockAuthManager: AuthManager;
-  let client: FlowsClient;
+  let client: FlowVersionsClient;
   let axiosInstance: { get: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -54,39 +54,39 @@ describe('FlowsClient', () => {
       getEnvironmentId: vi.fn().mockReturnValue('test-env-id'),
     } as unknown as AuthManager;
 
-    client = new FlowsClient(mockAuthManager);
+    client = new FlowVersionsClient(mockAuthManager);
     axiosInstance = vi.mocked(axios.create).mock.results[0].value;
   });
 
-  it('should call GET /flows for listFlows', async () => {
-    const mockFlows = [{ id: '1' }];
-    axiosInstance.get.mockResolvedValue({ data: mockFlows });
+  it('should call GET /flows/:flowId/versions for listFlowVersions', async () => {
+    const mockVersions = [{ version: 1 }, { version: 2 }];
+    axiosInstance.get.mockResolvedValue({ data: mockVersions });
 
-    const result = await client.listFlows();
+    const result = await client.listFlowVersions('flow-123');
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/flows');
-    expect(result).toEqual(mockFlows);
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123/versions');
+    expect(result).toEqual(mockVersions);
   });
 
-  it('should call GET /flows/:flowId for getFlow', async () => {
-    const mockFlow = { id: 'flow-123', name: 'Test Flow' };
-    axiosInstance.get.mockResolvedValue({ data: mockFlow });
+  it('should call GET /flows/:flowId/versions/:versionId for getFlowVersion', async () => {
+    const mockVersion = { version: 3, flow: { id: 'flow-123' } };
+    axiosInstance.get.mockResolvedValue({ data: mockVersion });
 
-    const result = await client.getFlow('flow-123');
+    const result = await client.getFlowVersion('flow-123', '3');
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123');
-    expect(result).toEqual(mockFlow);
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123/versions/3');
+    expect(result).toEqual(mockVersion);
   });
 
-  it('should propagate errors from listFlows', async () => {
+  it('should propagate errors from listFlowVersions', async () => {
     axiosInstance.get.mockRejectedValue(new Error('Network error'));
 
-    await expect(client.listFlows()).rejects.toThrow('Network error');
+    await expect(client.listFlowVersions('flow-123')).rejects.toThrow('Network error');
   });
 
-  it('should propagate errors from getFlow', async () => {
+  it('should propagate errors from getFlowVersion', async () => {
     axiosInstance.get.mockRejectedValue(new Error('Not found'));
 
-    await expect(client.getFlow('invalid-id')).rejects.toThrow('Not found');
+    await expect(client.getFlowVersion('invalid-id', '99')).rejects.toThrow('Not found');
   });
 });
