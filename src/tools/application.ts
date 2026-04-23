@@ -67,12 +67,13 @@ export function registerApplicationTools(
               },
             ],
           };
-        } catch (error: any) {
-          logger.error(`Error in tool ${TOOL_NAMES.LIST_APPLICATIONS}:`, error);
-          return {
-            content: [{ type: 'text', text: `Error: ${formatError(error)}` }],
-            isError: true,
-          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.LIST_APPLICATIONS.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to list applications: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       },
     );
@@ -85,7 +86,7 @@ export function registerApplicationTools(
       {
         description: MCP_TOOLS.DESCRIBE_APPLICATION.DESCRIPTION,
         inputSchema: z.object({
-          applicationId: z.string().describe('The ID of the application'),
+          applicationId: z.string().regex(/^[a-zA-Z0-9]+$/, 'Application ID must be alphanumeric').describe('The ID of the application'),
         }),
       },
       async ({ applicationId }) => {
@@ -99,12 +100,13 @@ export function registerApplicationTools(
               },
             ],
           };
-        } catch (error: any) {
+        } catch (error) {
           logger.error(`Error in tool ${TOOL_NAMES.DESCRIBE_APPLICATION}:`, error);
-          return {
-            content: [{ type: 'text', text: `Error: ${formatError(error)}` }],
-            isError: true,
-          };
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to describe application: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       },
     );
