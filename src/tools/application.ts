@@ -23,6 +23,7 @@ import { createToolFilter } from '../configs/settings.js';
 import { ApplicationsClient } from '../modules/auth/clients/application.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
+import { requiredId } from '../utils/schemas.js';
 
 
 /**
@@ -79,7 +80,7 @@ export function registerApplicationTools(
       {
         description: MCP_TOOLS.DESCRIBE_APPLICATION.DESCRIPTION,
         inputSchema: z.object({
-          applicationId: z.string().regex(/^[a-zA-Z0-9]+$/, 'Application ID must be alphanumeric').describe('The ID of the application'),
+          applicationId: requiredId('applicationId', 'The ID of the application'),
         }),
       },
       async ({ applicationId }) => {
