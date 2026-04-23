@@ -63,7 +63,7 @@ export function registerApplicationTools(
             content: [
               {
                 type: 'text',
-                text: JSON.stringify(applications, null, 2),
+                text: JSON.stringify(applications),
               },
             ],
           };
@@ -95,7 +95,7 @@ export function registerApplicationTools(
             content: [
               {
                 type: 'text',
-                text: JSON.stringify(application, null, 2),
+                text: JSON.stringify(application),
               },
             ],
           };
