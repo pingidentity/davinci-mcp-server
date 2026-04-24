@@ -53,6 +53,7 @@ describe('registerApplicationTools', () => {
     listApplications: ReturnType<typeof vi.fn>;
     describeApplication: ReturnType<typeof vi.fn>;
   };
+  let consoleSpy: ReturnType<typeof vi.fn>;
 
   async function setupServerAndClient(config: McpServerConfig) {
     server = new McpServer({ name: 'test', version: '0.0.1' });
@@ -71,6 +72,7 @@ describe('registerApplicationTools', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     logger = new Logger(false);
     mockAuthManager = {
       getLogger: vi.fn().mockReturnValue({

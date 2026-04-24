@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS, TOOL_NAMES } from '../utils/constants.js';
+import { MCP_TOOLS } from '../utils/constants.js';
 import { createToolFilter } from '../configs/settings.js';
 import { ApplicationsClient } from '../modules/auth/clients/application.js';
 import { AuthManager } from '../modules/auth/manager.js';
@@ -43,10 +43,10 @@ export function registerApplicationTools(
   const isToolIncluded = createToolFilter(config);
   const client = new ApplicationsClient(authManager);
 
-  if (isToolIncluded(TOOL_NAMES.LIST_APPLICATIONS)) {
-    logger.debug(`[Tools] Registering tool: ${TOOL_NAMES.LIST_APPLICATIONS}`);
+  if (isToolIncluded(MCP_TOOLS.LIST_APPLICATIONS.NAME)) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_APPLICATIONS.NAME}`);
     server.registerTool(
-      TOOL_NAMES.LIST_APPLICATIONS,
+      MCP_TOOLS.LIST_APPLICATIONS.NAME,
       {
         description: MCP_TOOLS.LIST_APPLICATIONS.DESCRIPTION,
       },
@@ -73,10 +73,10 @@ export function registerApplicationTools(
     );
   }
 
-  if (isToolIncluded(TOOL_NAMES.DESCRIBE_APPLICATION)) {
-    logger.debug(`[Tools] Registering tool: ${TOOL_NAMES.DESCRIBE_APPLICATION}`);
+  if (isToolIncluded(MCP_TOOLS.DESCRIBE_APPLICATION.NAME)) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_APPLICATION.NAME}`);
     server.registerTool(
-      TOOL_NAMES.DESCRIBE_APPLICATION,
+      MCP_TOOLS.DESCRIBE_APPLICATION.NAME,
       {
         description: MCP_TOOLS.DESCRIBE_APPLICATION.DESCRIPTION,
         inputSchema: z.object({
@@ -95,7 +95,7 @@ export function registerApplicationTools(
             ],
           };
         } catch (error) {
-          logger.error(`Error in tool ${TOOL_NAMES.DESCRIBE_APPLICATION}:`, error);
+          logger.error(`Error in tool ${MCP_TOOLS.DESCRIBE_APPLICATION.NAME}:`, error);
           if (error instanceof McpError) throw error;
           throw new McpError(
             ErrorCode.InternalError,

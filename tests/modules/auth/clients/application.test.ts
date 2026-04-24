@@ -39,9 +39,11 @@ describe('ApplicationsClient', () => {
   let mockAuthManager: AuthManager;
   let client: ApplicationsClient;
   let axiosInstance: { get: ReturnType<typeof vi.fn> };
+  let consoleSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockAuthManager = {
       getTokens: vi.fn().mockResolvedValue({ access_token: 'test-token' }),
       getLogger: vi.fn().mockReturnValue({
@@ -77,5 +79,17 @@ describe('ApplicationsClient', () => {
 
     expect(axiosInstance.get).toHaveBeenCalledWith(`/davinciApplications/${applicationId}`);
     expect(result).toEqual(mockApplication);
+  });
+
+  it('should propagate errors from listApplications', async () => {
+    axiosInstance.get.mockRejectedValue(new Error('Network error'));
+
+    await expect(client.listApplications()).rejects.toThrow('Network error');
+  });
+
+  it('should propagate errors from describeApplication', async () => {
+    axiosInstance.get.mockRejectedValue(new Error('Not found'));
+
+    await expect(client.describeApplication('invalid-id')).rejects.toThrow('Not found');
   });
 });
