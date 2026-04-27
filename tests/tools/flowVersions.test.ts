@@ -28,10 +28,12 @@ import { Logger } from '../../src/utils/logger.js';
 vi.mock('../../src/modules/auth/clients/flowVersions.js', () => {
   const mockListFlowVersions = vi.fn();
   const mockGetFlowVersion = vi.fn();
+  const mockGetFlowVersionDetails = vi.fn();
   return {
     FlowVersionsClient: class {
       listFlowVersions = mockListFlowVersions;
       getFlowVersion = mockGetFlowVersion;
+      getFlowVersionDetails = mockGetFlowVersionDetails;
     },
   };
 });
@@ -53,6 +55,7 @@ describe('registerFlowVersionTools', () => {
   let mockFlowVersionsClient: {
     listFlowVersions: ReturnType<typeof vi.fn>;
     getFlowVersion: ReturnType<typeof vi.fn>;
+    getFlowVersionDetails: ReturnType<typeof vi.fn>;
   };
 
   async function setupServerAndClient(config: McpServerConfig) {
@@ -187,10 +190,13 @@ describe('registerFlowVersionTools', () => {
 
   // --- describe_flow_version tool ---
 
-  it('should return flow version details from describe_flow_version', async () => {
+  it('should return combined flow version and details from describe_flow_version', async () => {
     await setupServerAndClient({ auth: mockAuth });
     const mockVersion = { version: 3, flow: { id: 'flow-123', name: 'Test Flow' } };
+    const mockDetails = { nodes: [{ id: 'node-1' }], edges: [] };
+    const expected = { ...mockVersion, ...mockDetails };
     mockFlowVersionsClient.getFlowVersion.mockResolvedValue(mockVersion);
+    mockFlowVersionsClient.getFlowVersionDetails.mockResolvedValue(mockDetails);
 
     const result = await client.callTool({
       name: MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
@@ -198,7 +204,8 @@ describe('registerFlowVersionTools', () => {
     });
 
     expect(mockFlowVersionsClient.getFlowVersion).toHaveBeenCalledWith('flow-123', '3');
-    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockVersion) }]);
+    expect(mockFlowVersionsClient.getFlowVersionDetails).toHaveBeenCalledWith('flow-123', '3');
+    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(expected) }]);
   });
 
   it('should throw McpError when describe_flow_version fails with generic error', async () => {
