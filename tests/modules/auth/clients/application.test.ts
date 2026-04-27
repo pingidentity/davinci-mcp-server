@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import { ApplicationsClient } from '../../../../src/modules/auth/clients/application.js';
 import { AuthManager } from '../../../../src/modules/auth/manager.js';
@@ -58,6 +58,10 @@ describe('ApplicationsClient', () => {
 
     client = new ApplicationsClient(mockAuthManager);
     axiosInstance = vi.mocked(axios.create).mock.results[0].value;
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
   });
 
   it('should call GET /davinciApplications for listApplications', async () => {

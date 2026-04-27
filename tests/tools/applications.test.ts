@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -84,6 +84,10 @@ describe('registerApplicationTools', () => {
       getRootDomain: vi.fn().mockReturnValue('pingidentity.com'),
       getEnvironmentId: vi.fn().mockReturnValue('test-env-id'),
     } as unknown as AuthManager;
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
   });
 
   // --- Registration ---
