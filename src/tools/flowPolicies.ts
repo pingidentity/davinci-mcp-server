@@ -25,7 +25,6 @@ import { Logger } from '../utils/logger.js';
 import { requiredId } from '../utils/schemas.js';
 import { FlowPoliciesClient } from '../modules/auth/clients/flowPolicies.js';
 
-
 /**
  * Registers flowPolicy-related MCP tools.
  *

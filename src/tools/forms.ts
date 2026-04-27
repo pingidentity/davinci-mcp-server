@@ -25,7 +25,6 @@ import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
 import { requiredId } from '../utils/schemas.js';
 
-
 /**
  * Registers form-related MCP tools.
  *

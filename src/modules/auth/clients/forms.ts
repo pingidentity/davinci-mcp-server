@@ -39,5 +39,5 @@ export class FormsClient extends DaVinciApiClient {
   async describeForm(formId: string) {
     const response = await this.axiosInstance.get(`/forms/${formId}`);
     return response.data;
-  } 
+  }
 }

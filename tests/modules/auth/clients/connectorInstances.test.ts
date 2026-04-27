@@ -75,7 +75,11 @@ describe('ConnectorInstancesClient', () => {
   });
 
   it('should call GET /connectorInstances/:instanceId for getConnectorInstance', async () => {
-    const mockInstance = { id: 'abc123', name: 'Functions', connector: { id: 'functionsConnector' } };
+    const mockInstance = {
+      id: 'abc123',
+      name: 'Functions',
+      connector: { id: 'functionsConnector' },
+    };
     axiosInstance.get.mockResolvedValue({ data: mockInstance });
 
     const result = await client.getConnectorInstance('abc123');

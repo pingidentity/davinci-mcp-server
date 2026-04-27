@@ -30,7 +30,7 @@ export class ApplicationsClient extends DaVinciApiClient {
     return response.data;
   }
 
-   /**
+  /**
    * Retrieves details of a single DaVinci application by ID.
    *
    * @param applicationId - The ID of the application to retrieve.
@@ -39,5 +39,5 @@ export class ApplicationsClient extends DaVinciApiClient {
   async describeApplication(applicationId: string) {
     const response = await this.axiosInstance.get(`/davinciApplications/${applicationId}`);
     return response.data;
-  } 
+  }
 }
