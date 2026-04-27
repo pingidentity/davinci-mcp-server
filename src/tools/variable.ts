@@ -23,6 +23,7 @@ import { createToolFilter } from '../configs/settings.js';
 import { VariablesClient } from '../modules/auth/clients/variables.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
+import { requiredId } from '../utils/schemas.js';
 
 /**
  * Registers variable-related MCP tools.
@@ -41,10 +42,10 @@ export function registerVariableTools(
   const isToolIncluded = createToolFilter(config);
   const client = new VariablesClient(authManager);
 
-  if (isToolIncluded(TOOL_NAMES.LIST_VARIABLES)) {
-    logger.debug(`[Tools] Registering tool: ${TOOL_NAMES.LIST_VARIABLES}`);
+  if (isToolIncluded(MCP_TOOLS.LIST_VARIABLES.NAME)) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_VARIABLES.NAME}`);
     server.registerTool(
-      TOOL_NAMES.LIST_VARIABLES,
+      MCP_TOOLS.LIST_VARIABLES.NAME,
       {
         description: MCP_TOOLS.LIST_VARIABLES.DESCRIPTION,
       },
@@ -71,14 +72,14 @@ export function registerVariableTools(
     );
   }
 
-  if (isToolIncluded(TOOL_NAMES.DESCRIBE_VARIABLE)) {
-    logger.debug(`[Tools] Registering tool: ${TOOL_NAMES.DESCRIBE_VARIABLE}`);
+  if (isToolIncluded(MCP_TOOLS.DESCRIBE_VARIABLE.NAME)) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_VARIABLE.NAME}`);
     server.registerTool(
-      TOOL_NAMES.DESCRIBE_VARIABLE,
+      MCP_TOOLS.DESCRIBE_VARIABLE.NAME,
       {
         description: MCP_TOOLS.DESCRIBE_VARIABLE.DESCRIPTION,
         inputSchema: z.object({
-          variableId: z.string().regex(/^[a-zA-Z0-9]+$/, 'Variable ID must be alphanumeric').describe('The ID of the variable'),
+          variableId: requiredId('variableId'),
         }),
       },
       async ({ variableId }) => {
@@ -93,7 +94,7 @@ export function registerVariableTools(
             ],
           };
         } catch (error) {
-          logger.error(`Error in tool ${TOOL_NAMES.DESCRIBE_VARIABLE}:`, error);
+          logger.error(`Error in tool ${MCP_TOOLS.DESCRIBE_VARIABLE.NAME}:`, error);
           if (error instanceof McpError) throw error;
           throw new McpError(
             ErrorCode.InternalError,

@@ -77,4 +77,16 @@ describe('VariablesClient', () => {
     expect(axiosInstance.get).toHaveBeenCalledWith('/variables/1');
     expect(result).toEqual(mockVariable);
   });
+
+  it('should propagate errors from listVariables', async () => {
+    axiosInstance.get.mockRejectedValue(new Error('Network error'));
+
+    await expect(client.listVariables()).rejects.toThrow('Network error');
+  });
+
+  it('should propagate errors from describeVariable', async () => {
+    axiosInstance.get.mockRejectedValue(new Error('Not found'));
+
+    await expect(client.describeVariable('invalid-id')).rejects.toThrow('Not found');
+  });
 });
