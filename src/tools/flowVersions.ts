@@ -89,8 +89,13 @@ export function registerFlowVersionTools(
       async ({ flowId, versionId }) => {
         try {
           const flowVersion = await flowVersionsClient.getFlowVersion(flowId, versionId);
+          const flowVersionDetails = await flowVersionsClient.getFlowVersionDetails(
+            flowId,
+            versionId,
+          );
+          const result = { ...flowVersion, ...flowVersionDetails };
           return {
-            content: [{ type: 'text', text: JSON.stringify(flowVersion) }],
+            content: [{ type: 'text', text: JSON.stringify(result) }],
           };
         } catch (error) {
           logger.error(`Error in tool ${MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME}:`, error);

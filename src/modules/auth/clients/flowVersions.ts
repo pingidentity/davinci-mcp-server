@@ -32,14 +32,27 @@ export class FlowVersionsClient extends DaVinciApiClient {
   }
 
   /**
-   * Retrieves details of a specific version of a flow.
+   * Retrieves metadata of a specific version of a flow.
    *
    * @param flowId - The ID of the flow.
    * @param versionId - The ID of the version to retrieve.
-   * @returns A promise that resolves to the flow version details.
+   * @returns A promise that resolves to the flow version metadata.
    */
   async getFlowVersion(flowId: string, versionId: string) {
     const response = await this.axiosInstance.get(`/flows/${flowId}/versions/${versionId}`);
+    return response.data;
+  }
+
+  /**
+   * Retrieves the full details of a specific flow version, including
+   * the node graph, edges, and settings.
+   *
+   * @param flowId - The ID of the flow.
+   * @param versionId - The ID of the version to retrieve details for.
+   * @returns A promise that resolves to the flow version details.
+   */
+  async getFlowVersionDetails(flowId: string, versionId: string) {
+    const response = await this.axiosInstance.get(`/flows/${flowId}/versions/${versionId}/details`);
     return response.data;
   }
 }
