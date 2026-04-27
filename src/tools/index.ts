@@ -54,6 +54,5 @@ export function registerAllTools(
   registerConnectorInstanceTools(server, config, authManager, logger);
   registerFormTools(server, config, authManager, logger);
 
-
   logger.info('[Tools] Tool registration complete.');
 }
