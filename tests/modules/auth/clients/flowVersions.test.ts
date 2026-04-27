@@ -84,6 +84,16 @@ describe('FlowVersionsClient', () => {
     expect(result).toEqual(mockVersion);
   });
 
+  it('should call GET /flows/:flowId/versions/:versionId/details for getFlowVersionDetails', async () => {
+    const mockDetails = { nodes: [], edges: [] };
+    axiosInstance.get.mockResolvedValue({ data: mockDetails });
+
+    const result = await client.getFlowVersionDetails('flow-123', '3');
+
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123/versions/3/details');
+    expect(result).toEqual(mockDetails);
+  });
+
   it('should propagate errors from listFlowVersions', async () => {
     axiosInstance.get.mockRejectedValue(new Error('Network error'));
 
@@ -94,5 +104,11 @@ describe('FlowVersionsClient', () => {
     axiosInstance.get.mockRejectedValue(new Error('Not found'));
 
     await expect(client.getFlowVersion('invalid-id', '99')).rejects.toThrow('Not found');
+  });
+
+  it('should propagate errors from getFlowVersionDetails', async () => {
+    axiosInstance.get.mockRejectedValue(new Error('Not found'));
+
+    await expect(client.getFlowVersionDetails('invalid-id', '99')).rejects.toThrow('Not found');
   });
 });
