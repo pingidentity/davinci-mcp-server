@@ -27,6 +27,7 @@ const PARAM_DESCRIPTIONS: Record<string, string> = {
   instanceId: 'The ID of the connector instance',
   applicationId: 'The ID of the application',
   flowPolicyId: 'The ID of the flow policy',
+  variableId: 'The ID of the variable',
 };
 
 /**
