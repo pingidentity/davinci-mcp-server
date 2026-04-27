@@ -59,9 +59,7 @@ describe('registerFormTools', () => {
     server = new McpServer({ name: 'test', version: '0.0.1' });
     registerFormTools(server, config, mockAuthManager, logger);
 
-    mockFormsClient = new FormsClient(
-      mockAuthManager,
-    ) as unknown as typeof mockFormsClient;
+    mockFormsClient = new FormsClient(mockAuthManager) as unknown as typeof mockFormsClient;
 
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     client = new Client({ name: 'test-client', version: '0.0.1' });
@@ -237,9 +235,7 @@ describe('registerFormTools', () => {
     server = new McpServer({ name: 'test', version: '0.0.1' });
     registerFormTools(server, { auth: mockAuth }, mockAuthManager, verboseLogger);
 
-    expect(debugSpy).toHaveBeenCalledWith(
-      `[Tools] Registering tool: ${MCP_TOOLS.LIST_FORMS.NAME}`,
-    );
+    expect(debugSpy).toHaveBeenCalledWith(`[Tools] Registering tool: ${MCP_TOOLS.LIST_FORMS.NAME}`);
     expect(debugSpy).toHaveBeenCalledWith(
       `[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_FORM.NAME}`,
     );

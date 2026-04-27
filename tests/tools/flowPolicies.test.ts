@@ -133,7 +133,10 @@ describe('registerFlowPoliciesTools', () => {
       server,
       {
         auth: mockAuth,
-        excludeTools: [MCP_TOOLS.LIST_APPLICATION_FLOW_POLICIES.NAME, MCP_TOOLS.DESCRIBE_APPLICATION_FLOW_POLICY.NAME],
+        excludeTools: [
+          MCP_TOOLS.LIST_APPLICATION_FLOW_POLICIES.NAME,
+          MCP_TOOLS.DESCRIBE_APPLICATION_FLOW_POLICY.NAME,
+        ],
       },
       mockAuthManager,
       logger,

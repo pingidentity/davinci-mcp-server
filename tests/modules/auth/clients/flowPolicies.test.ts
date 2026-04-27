@@ -71,7 +71,9 @@ describe('FlowPoliciesClient', () => {
 
     const result = await client.listFlowPolicies(applicationId);
 
-    expect(axiosInstance.get).toHaveBeenCalledWith(`/davinciApplications/${applicationId}/flowPolicies`);
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      `/davinciApplications/${applicationId}/flowPolicies`,
+    );
     expect(result).toEqual(mockFlowPolicies);
   });
 
@@ -83,7 +85,9 @@ describe('FlowPoliciesClient', () => {
 
     const result = await client.describeFlowPolicy(applicationId, flowPolicyId);
 
-    expect(axiosInstance.get).toHaveBeenCalledWith(`/davinciApplications/${applicationId}/flowPolicies/${flowPolicyId}`);
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      `/davinciApplications/${applicationId}/flowPolicies/${flowPolicyId}`,
+    );
     expect(result).toEqual(mockFlowPolicy);
   });
 
@@ -99,6 +103,8 @@ describe('FlowPoliciesClient', () => {
     const flowPolicyId = 'invalid-id';
     axiosInstance.get.mockRejectedValue(new Error('Not found'));
 
-    await expect(client.describeFlowPolicy(applicationId, flowPolicyId)).rejects.toThrow('Not found');
+    await expect(client.describeFlowPolicy(applicationId, flowPolicyId)).rejects.toThrow(
+      'Not found',
+    );
   });
 });

@@ -39,5 +39,5 @@ export class VariablesClient extends DaVinciApiClient {
   async describeVariable(variableId: string) {
     const response = await this.axiosInstance.get(`/variables/${variableId}`);
     return response.data;
-  } 
+  }
 }

@@ -26,7 +26,9 @@ export class FlowPoliciesClient extends DaVinciApiClient {
    * @returns A promise that resolves to the list of flow policies.
    */
   async listFlowPolicies(applicationId: string) {
-    const response = await this.axiosInstance.get(`/davinciApplications/${applicationId}/flowPolicies`);
+    const response = await this.axiosInstance.get(
+      `/davinciApplications/${applicationId}/flowPolicies`,
+    );
     return response.data;
   }
 
@@ -38,7 +40,9 @@ export class FlowPoliciesClient extends DaVinciApiClient {
    * @returns A promise that resolves to the flow policy details.
    */
   async describeFlowPolicy(applicationId: string, flowPolicyId: string) {
-    const response = await this.axiosInstance.get(`/davinciApplications/${applicationId}/flowPolicies/${flowPolicyId}`);
+    const response = await this.axiosInstance.get(
+      `/davinciApplications/${applicationId}/flowPolicies/${flowPolicyId}`,
+    );
     return response.data;
-  } 
+  }
 }

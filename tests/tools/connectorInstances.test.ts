@@ -210,9 +210,7 @@ describe('registerConnectorInstanceTools', () => {
     });
 
     expect(mockConnectorInstancesClient.getConnectorInstance).toHaveBeenCalledWith('abc123');
-    expect(result.content).toEqual([
-      { type: 'text', text: JSON.stringify(mockInstance) },
-    ]);
+    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockInstance) }]);
   });
 
   it('should throw McpError when describe_connector_instance fails with generic error', async () => {
