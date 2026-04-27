@@ -27,7 +27,7 @@ import { FlowPoliciesClient } from '../modules/auth/clients/flowPolicies.js';
 
 
 /**
- * Registers application-related MCP tools.
+ * Registers flowPolicy-related MCP tools.
  *
  * @param server - The {@link McpServer} instance.
  * @param config - Server configuration for filtering.
@@ -55,12 +55,12 @@ export function registerFlowPoliciesTools(
       },
       async ({ applicationId }) => {
         try {
-          const applications = await client.listFlowPolicies(applicationId);
+          const flowPolicies = await client.listFlowPolicies(applicationId);
           return {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify(applications),
+                text: JSON.stringify(flowPolicies),
               },
             ],
           };
@@ -89,12 +89,12 @@ export function registerFlowPoliciesTools(
       },
       async ({ applicationId, flowPolicyId }) => {
         try {
-          const application = await client.describeFlowPolicy(applicationId, flowPolicyId);
+          const flowPolicy = await client.describeFlowPolicy(applicationId, flowPolicyId);
           return {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify(application),
+                text: JSON.stringify(flowPolicy),
               },
             ],
           };

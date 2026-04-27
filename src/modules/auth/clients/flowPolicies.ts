@@ -22,7 +22,7 @@ import { DaVinciApiClient } from './davinci.js';
 export class FlowPoliciesClient extends DaVinciApiClient {
   /**
    * Retrieves a list of all flow policies in the current environment.
-   *
+   * @param applicationId - The ID of the application to which the flow policies belong.
    * @returns A promise that resolves to the list of flow policies.
    */
   async listFlowPolicies(applicationId: string) {
@@ -30,7 +30,7 @@ export class FlowPoliciesClient extends DaVinciApiClient {
     return response.data;
   }
 
-   /**
+  /**
    * Retrieves details of a single DaVinci flow policy by ID.
    *
    * @param applicationId - The ID of the application to which the flow policy belongs.
