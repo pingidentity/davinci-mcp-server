@@ -24,6 +24,7 @@ import { registerConnectorTools } from './connectors.js';
 import { registerConnectorInstanceTools } from './connectorInstances.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
+import { registerFormTools } from './forms.js';
 import { registerFlowPoliciesTools } from './flowPolicies.js';
 
 /**
@@ -52,6 +53,7 @@ export function registerAllTools(
   registerFlowVersionTools(server, config, authManager, logger);
   registerConnectorTools(server, config, authManager, logger);
   registerConnectorInstanceTools(server, config, authManager, logger);
+  registerFormTools(server, config, authManager, logger);
   registerFlowPoliciesTools(server, config, authManager, logger);
 
   logger.info('[Tools] Tool registration complete.');
