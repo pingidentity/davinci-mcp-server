@@ -30,7 +30,7 @@ export class VariablesClient extends DaVinciApiClient {
     return response.data;
   }
 
-   /**
+  /**
    * Retrieves details of a single DaVinci variable by ID.
    *
    * @param variableId - The ID of the variable to retrieve.

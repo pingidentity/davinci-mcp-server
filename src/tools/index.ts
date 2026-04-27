@@ -17,7 +17,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpServerConfig } from '../types/index.js';
 import { registerFlowTools } from './flows.js';
-import { registerVariableTools } from './variable.js';
+import { registerVariableTools } from './variables.js';
 import { registerApplicationTools } from './application.js';
 import { registerFlowVersionTools } from './flowVersions.js';
 import { registerConnectorTools } from './connectors.js';

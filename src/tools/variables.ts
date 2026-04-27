@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS, TOOL_NAMES } from '../utils/constants.js';
+import { MCP_TOOLS } from '../utils/constants.js';
 import { createToolFilter } from '../configs/settings.js';
 import { VariablesClient } from '../modules/auth/clients/variables.js';
 import { AuthManager } from '../modules/auth/manager.js';

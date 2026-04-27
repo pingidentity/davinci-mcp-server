@@ -19,7 +19,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { registerVariableTools } from '../../src/tools/variable.js';
+import { registerVariableTools } from '../../src/tools/variables.js';
 import { McpServerConfig } from '../../src/types/index.js';
 import { MCP_TOOLS } from '../../src/utils/constants.js';
 import { AuthManager } from '../../src/modules/auth/manager.js';
