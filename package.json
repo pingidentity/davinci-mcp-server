@@ -1,5 +1,5 @@
 {
-  "name": "davinci-mcp-server",
+  "name": "@ping-identity/davinci-mcp-server",
   "version": "0.1.0",
   "description": "A Model Context Protocol (MCP) server for PingIdentity DaVinci",
   "type": "module",
