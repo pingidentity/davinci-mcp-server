@@ -19,24 +19,24 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { registerFlowVersionTools } from '../../src/tools/flowVersions.js';
+import { registerApplicationTools } from '../../src/tools/application.js';
 import { McpServerConfig } from '../../src/types/index.js';
 import { MCP_TOOLS } from '../../src/utils/constants.js';
 import { AuthManager } from '../../src/modules/auth/manager.js';
 import { Logger } from '../../src/utils/logger.js';
 
-vi.mock('../../src/modules/auth/clients/flowVersions.js', () => {
-  const mockListFlowVersions = vi.fn();
-  const mockGetFlowVersion = vi.fn();
+vi.mock('../../src/modules/auth/clients/application.js', () => {
+  const mockListApplications = vi.fn();
+  const mockDescribeApplication = vi.fn();
   return {
-    FlowVersionsClient: class {
-      listFlowVersions = mockListFlowVersions;
-      getFlowVersion = mockGetFlowVersion;
+    ApplicationsClient: class {
+      listApplications = mockListApplications;
+      describeApplication = mockDescribeApplication;
     },
   };
 });
 
-import { FlowVersionsClient } from '../../src/modules/auth/clients/flowVersions.js';
+import { ApplicationsClient } from '../../src/modules/auth/clients/application.js';
 
 const mockAuth = {
   clientId: 'test-client-id',
@@ -44,25 +44,24 @@ const mockAuth = {
   rootDomain: 'pingidentity.com',
 };
 
-describe('registerFlowVersionTools', () => {
+describe('registerApplicationTools', () => {
   let server: McpServer;
   let client: Client;
   let mockAuthManager: AuthManager;
   let logger: Logger;
-  let consoleSpy: ReturnType<typeof vi.spyOn>;
-  let mockFlowVersionsClient: {
-    listFlowVersions: ReturnType<typeof vi.fn>;
-    getFlowVersion: ReturnType<typeof vi.fn>;
+  let mockApplicationsClient: {
+    listApplications: ReturnType<typeof vi.fn>;
+    describeApplication: ReturnType<typeof vi.fn>;
   };
+  let consoleSpy: ReturnType<typeof vi.fn>;
 
   async function setupServerAndClient(config: McpServerConfig) {
     server = new McpServer({ name: 'test', version: '0.0.1' });
-    registerFlowVersionTools(server, config, mockAuthManager, logger);
+    registerApplicationTools(server, config, mockAuthManager, logger);
 
-    // Grab the mock instance created during registerFlowVersionTools
-    mockFlowVersionsClient = new FlowVersionsClient(
+    mockApplicationsClient = new ApplicationsClient(
       mockAuthManager,
-    ) as unknown as typeof mockFlowVersionsClient;
+    ) as unknown as typeof mockApplicationsClient;
 
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     client = new Client({ name: 'test-client', version: '0.0.1' });
@@ -98,43 +97,43 @@ describe('registerFlowVersionTools', () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
 
-    expect(names).toContain(MCP_TOOLS.LIST_FLOW_VERSIONS.NAME);
-    expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_APPLICATIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.DESCRIBE_APPLICATION.NAME);
   });
 
-  it('should register only list_flow_versions when describe_flow_version is excluded', async () => {
+  it('should register only list_applications when describe_application is excluded', async () => {
     await setupServerAndClient({
       auth: mockAuth,
-      excludeTools: [MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME],
+      excludeTools: [MCP_TOOLS.DESCRIBE_APPLICATION.NAME],
     });
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
 
-    expect(names).toContain(MCP_TOOLS.LIST_FLOW_VERSIONS.NAME);
-    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_APPLICATIONS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_APPLICATION.NAME);
   });
 
-  it('should register only describe_flow_version when list_flow_versions is excluded', async () => {
+  it('should register only describe_application when list_applications is excluded', async () => {
     await setupServerAndClient({
       auth: mockAuth,
-      excludeTools: [MCP_TOOLS.LIST_FLOW_VERSIONS.NAME],
+      excludeTools: [MCP_TOOLS.LIST_APPLICATIONS.NAME],
     });
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
 
-    expect(names).not.toContain(MCP_TOOLS.LIST_FLOW_VERSIONS.NAME);
-    expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME);
+    expect(names).not.toContain(MCP_TOOLS.LIST_APPLICATIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.DESCRIBE_APPLICATION.NAME);
   });
 
   it('should register no tools when both are excluded', () => {
     const registerToolSpy = vi.fn();
     server = new McpServer({ name: 'test', version: '0.0.1' });
     server.registerTool = registerToolSpy;
-    registerFlowVersionTools(
+    registerApplicationTools(
       server,
       {
         auth: mockAuth,
-        excludeTools: [MCP_TOOLS.LIST_FLOW_VERSIONS.NAME, MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME],
+        excludeTools: [MCP_TOOLS.LIST_APPLICATIONS.NAME, MCP_TOOLS.DESCRIBE_APPLICATION.NAME],
       },
       mockAuthManager,
       logger,
@@ -143,85 +142,82 @@ describe('registerFlowVersionTools', () => {
     expect(registerToolSpy).not.toHaveBeenCalled();
   });
 
-  // --- list_flow_versions tool ---
+  // --- list_applications tool ---
 
-  it('should return flow versions from list_flow_versions', async () => {
+  it('should return applications from list_applications', async () => {
     await setupServerAndClient({ auth: mockAuth });
-    const mockData = [{ version: 1 }, { version: 2 }];
-    mockFlowVersionsClient.listFlowVersions.mockResolvedValue(mockData);
+    const mockData = [{ id: 'app-1' }, { id: 'app-2' }];
+    mockApplicationsClient.listApplications.mockResolvedValue(mockData);
 
     const result = await client.callTool({
-      name: MCP_TOOLS.LIST_FLOW_VERSIONS.NAME,
-      arguments: { flowId: 'flow-123' },
+      name: MCP_TOOLS.LIST_APPLICATIONS.NAME,
     });
 
-    expect(mockFlowVersionsClient.listFlowVersions).toHaveBeenCalledWith('flow-123');
+    expect(mockApplicationsClient.listApplications).toHaveBeenCalled();
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockData) }]);
   });
 
-  it('should throw McpError when list_flow_versions fails with generic error', async () => {
+  it('should return an error when list_applications fails with generic error', async () => {
     await setupServerAndClient({ auth: mockAuth });
-    mockFlowVersionsClient.listFlowVersions.mockRejectedValue(new Error('Network error'));
+    mockApplicationsClient.listApplications.mockRejectedValue(new Error('Network error'));
 
     const result = await client.callTool({
-      name: MCP_TOOLS.LIST_FLOW_VERSIONS.NAME,
-      arguments: { flowId: 'flow-123' },
+      name: MCP_TOOLS.LIST_APPLICATIONS.NAME,
     });
 
     expect(result.isError).toBe(true);
   });
 
-  it('should rethrow McpError from list_flow_versions as-is', async () => {
+  it('should rethrow McpError from list_applications as-is', async () => {
     await setupServerAndClient({ auth: mockAuth });
-    mockFlowVersionsClient.listFlowVersions.mockRejectedValue(
+    mockApplicationsClient.listApplications.mockRejectedValue(
       new McpError(ErrorCode.InternalError, 'Auth failed'),
     );
 
     const result = await client.callTool({
-      name: MCP_TOOLS.LIST_FLOW_VERSIONS.NAME,
-      arguments: { flowId: 'flow-123' },
+      name: MCP_TOOLS.LIST_APPLICATIONS.NAME,
     });
 
     expect(result.isError).toBe(true);
   });
 
-  // --- describe_flow_version tool ---
+  // --- describe_application tool ---
 
-  it('should return flow version details from describe_flow_version', async () => {
+  it('should return application details from describe_application', async () => {
     await setupServerAndClient({ auth: mockAuth });
-    const mockVersion = { version: 3, flow: { id: 'flow-123', name: 'Test Flow' } };
-    mockFlowVersionsClient.getFlowVersion.mockResolvedValue(mockVersion);
+    const mockApplication = { id: 'app-123', name: 'Test Application' };
+    mockApplicationsClient.describeApplication.mockResolvedValue(mockApplication);
 
     const result = await client.callTool({
-      name: MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
-      arguments: { flowId: 'flow-123', versionId: '3' },
+      name: MCP_TOOLS.DESCRIBE_APPLICATION.NAME,
+      arguments: { applicationId: 'app-123' },
     });
 
-    expect(mockFlowVersionsClient.getFlowVersion).toHaveBeenCalledWith('flow-123', '3');
-    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockVersion) }]);
+    expect(mockApplicationsClient.describeApplication).toHaveBeenCalledWith('app-123');
+    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockApplication) }]);
   });
 
-  it('should throw McpError when describe_flow_version fails with generic error', async () => {
+  it('should return an error when describe_application fails with generic error', async () => {
     await setupServerAndClient({ auth: mockAuth });
-    mockFlowVersionsClient.getFlowVersion.mockRejectedValue(new Error('Not found'));
+    mockApplicationsClient.describeApplication.mockRejectedValue(new Error('Not found'));
 
     const result = await client.callTool({
-      name: MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
-      arguments: { flowId: 'invalid-id', versionId: '99' },
+      name: MCP_TOOLS.DESCRIBE_APPLICATION.NAME,
+      arguments: { applicationId: 'invalid-app' },
     });
 
     expect(result.isError).toBe(true);
   });
 
-  it('should rethrow McpError from describe_flow_version as-is', async () => {
+  it('should rethrow McpError from describe_application as-is', async () => {
     await setupServerAndClient({ auth: mockAuth });
-    mockFlowVersionsClient.getFlowVersion.mockRejectedValue(
+    mockApplicationsClient.describeApplication.mockRejectedValue(
       new McpError(ErrorCode.InternalError, 'Auth failed'),
     );
 
     const result = await client.callTool({
-      name: MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
-      arguments: { flowId: 'flow-123', versionId: '3' },
+      name: MCP_TOOLS.DESCRIBE_APPLICATION.NAME,
+      arguments: { applicationId: 'app-123' },
     });
 
     expect(result.isError).toBe(true);
@@ -239,13 +235,13 @@ describe('registerFlowVersionTools', () => {
     } as unknown as Logger;
 
     server = new McpServer({ name: 'test', version: '0.0.1' });
-    registerFlowVersionTools(server, { auth: mockAuth }, mockAuthManager, verboseLogger);
+    registerApplicationTools(server, { auth: mockAuth }, mockAuthManager, verboseLogger);
 
     expect(debugSpy).toHaveBeenCalledWith(
-      `[Tools] Registering tool: ${MCP_TOOLS.LIST_FLOW_VERSIONS.NAME}`,
+      `[Tools] Registering tool: ${MCP_TOOLS.LIST_APPLICATIONS.NAME}`,
     );
     expect(debugSpy).toHaveBeenCalledWith(
-      `[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME}`,
+      `[Tools] Registering tool: ${MCP_TOOLS.DESCRIBE_APPLICATION.NAME}`,
     );
   });
 });

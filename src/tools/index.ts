@@ -18,7 +18,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpServerConfig } from '../types/index.js';
 import { registerFlowTools } from './flows.js';
 import { registerVariableTools } from './variable.js';
+import { registerApplicationTools } from './application.js';
 import { registerFlowVersionTools } from './flowVersions.js';
+import { registerConnectorTools } from './connectors.js';
+import { registerConnectorInstanceTools } from './connectorInstances.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
 
@@ -44,7 +47,10 @@ export function registerAllTools(
 ) {
   registerFlowTools(server, config, authManager, logger);
   registerVariableTools(server, config, authManager, logger);
+  registerApplicationTools(server, config, authManager, logger);
   registerFlowVersionTools(server, config, authManager, logger);
+  registerConnectorTools(server, config, authManager, logger);
+  registerConnectorInstanceTools(server, config, authManager, logger);
 
   logger.info('[Tools] Tool registration complete.');
 }
