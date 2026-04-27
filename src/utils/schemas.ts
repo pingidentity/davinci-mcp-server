@@ -27,6 +27,7 @@ const PARAM_DESCRIPTIONS: Record<string, string> = {
   instanceId: 'The ID of the connector instance',
   applicationId: 'The ID of the application',
   variableId: 'The ID of the variable',
+  formId: 'The ID of the form',
 };
 
 /**
