@@ -30,7 +30,7 @@ export class FormsClient extends DaVinciApiClient {
     return response.data;
   }
 
-   /**
+  /**
    * Retrieves details of a single DaVinci form by ID.
    *
    * @param formId - The ID of the form to retrieve.
