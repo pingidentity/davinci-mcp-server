@@ -25,6 +25,7 @@ import { registerConnectorInstanceTools } from './connectorInstances.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
 import { registerFormTools } from './forms.js';
+import { registerFlowPoliciesTools } from './flowPolicies.js';
 
 /**
  * Registers all available MCP tools with the server.
@@ -53,6 +54,7 @@ export function registerAllTools(
   registerConnectorTools(server, config, authManager, logger);
   registerConnectorInstanceTools(server, config, authManager, logger);
   registerFormTools(server, config, authManager, logger);
+  registerFlowPoliciesTools(server, config, authManager, logger);
 
   logger.info('[Tools] Tool registration complete.');
 }
