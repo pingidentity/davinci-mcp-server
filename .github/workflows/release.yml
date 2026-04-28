@@ -61,3 +61,7 @@ jobs:
             ${{ steps.version.outputs.prerelease == 'true' && '--prerelease' || '' }} \
             "davinci-mcp-server-${{ github.ref_name }}.tar.gz" \
             SHA256SUMS.txt
+      
+      - name: Publish to npm
+        run: |
+          npm publish ${{ steps.version.outputs.prerelease == 'true' && '--tag beta' || '' }} --access public --provenance
