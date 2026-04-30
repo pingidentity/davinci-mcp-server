@@ -31,6 +31,17 @@ export class Logger {
   constructor(private readonly verbose: boolean = false) {}
 
   /**
+   * Prints a message directly to stdout.
+   * This should only be used for CLI output (like --help) before the MCP server starts.
+   *
+   * @param message - The message to print.
+   * @param args - Additional arguments to print.
+   */
+  printCliOutput(message: string, ...args: unknown[]): void {
+    console.log(message, ...args);
+  }
+
+  /**
    * Logs an informational message.
    * Only logged if verbose mode is enabled.
    *

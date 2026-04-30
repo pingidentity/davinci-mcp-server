@@ -17,6 +17,38 @@
 export const MCP_SERVER_NAME = 'davinci-mcp-server';
 export const MCP_SERVER_VERSION = '0.1.0';
 
+export const HELP_TEXT = `
+${MCP_SERVER_NAME} v${MCP_SERVER_VERSION}
+A Model Context Protocol (MCP) server for PingOne DaVinci.
+
+Usage:
+  npx @ping-identity/davinci-mcp-server <command> [options]
+
+Commands:
+  start                         Start the MCP server.
+
+Options:
+  --include-collections         Comma-separated list of collection names to include.
+  --exclude-collections         Comma-separated list of collection names to exclude.
+  --include-tools               Comma-separated list of tool names to include.
+  --exclude-tools               Comma-separated list of tool names to exclude.
+  --verbose                     Enable verbose logging.
+  --logout                      Trigger logout flow on startup.
+  --help                        Show this help message.
+
+Environment Variables:
+  AUTHORIZATION_CODE_CLIENT_ID  (Required) The OIDC Client ID for authorization.
+  DAVINCI_MCP_ENVIRONMENT_ID    (Required) The DaVinci environment ID.
+  ROOT_DOMAIN                   (Required) The root domain for DaVinci API calls (e.g., pingone.com).
+  CUSTOM_DOMAIN                 (Optional) A custom domain for DaVinci API calls.
+
+Example:
+  export AUTHORIZATION_CODE_CLIENT_ID=your-client-id
+  export DAVINCI_MCP_ENVIRONMENT_ID=your-env-id
+  export ROOT_DOMAIN=pingone.com
+  npx @ping-identity/davinci-mcp-server start
+`;
+
 /**
  * CLI argument option keys.
  *
@@ -30,6 +62,7 @@ export const CLI_ARG_OPTIONS = {
   EXCLUDE_TOOLS: 'exclude-tools',
   VERBOSE: 'verbose',
   LOGOUT: 'logout',
+  HELP: 'help',
 } as const;
 
 /**

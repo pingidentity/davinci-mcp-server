@@ -16,7 +16,8 @@
 
 import { parseArgs } from 'node:util';
 import { McpServerConfig } from '../types/index.js';
-import { CLI_ARG_OPTIONS, MCP_TOOLS, type ToolName } from '../utils/constants.js';
+import { CLI_ARG_OPTIONS, HELP_TEXT, MCP_TOOLS, type ToolName } from '../utils/constants.js';
+import { Logger } from '../utils/logger.js';
 
 const TOOLS_BY_NAME = new Map(Object.values(MCP_TOOLS).map((tool) => [tool.NAME, tool]));
 
@@ -42,6 +43,15 @@ const splitAndTrim = (val: string | boolean | undefined): string[] =>
 /**
  * Parses command-line arguments and returns the MCP server configuration.
  *
+ * If the --help flag is provided or no command is specified, the help message
+ * is printed and the process exits with code 0.
+ *
+ * If an unknown command is provided, an error message is printed and the
+ * process exits with code 1.
+ *
+ * If required environment variables are missing when starting the server,
+ * an error message is printed and the process exits with code 1.
+ *
  * Supported CLI flags:
  * - `--include-collections <list>` — Comma-separated collection names to include.
  * - `--exclude-collections <list>` — Comma-separated collection names to exclude.
@@ -49,22 +59,48 @@ const splitAndTrim = (val: string | boolean | undefined): string[] =>
  * - `--exclude-tools <list>` — Comma-separated tool names to exclude.
  * - `--verbose` — Enable verbose logging to stderr.
  * - `--logout` — Trigger logout flow on startup.
+ * - `--help` — Show help message.
  *
  * @returns A {@link McpServerConfig} object populated from CLI arguments.
  */
 export const getCliConfig = (): McpServerConfig => {
-  const { values } = parseArgs({
-    args: process.argv.slice(2),
-    options: {
-      [CLI_ARG_OPTIONS.INCLUDE_COLLECTIONS]: { type: 'string' },
-      [CLI_ARG_OPTIONS.EXCLUDE_COLLECTIONS]: { type: 'string' },
-      [CLI_ARG_OPTIONS.INCLUDE_TOOLS]: { type: 'string' },
-      [CLI_ARG_OPTIONS.EXCLUDE_TOOLS]: { type: 'string' },
-      [CLI_ARG_OPTIONS.VERBOSE]: { type: 'boolean' },
-      [CLI_ARG_OPTIONS.LOGOUT]: { type: 'boolean' },
-    } as const,
-    strict: false,
-  });
+  const logger = new Logger();
+  let parsed;
+  try {
+    parsed = parseArgs({
+      args: process.argv.slice(2),
+      options: {
+        [CLI_ARG_OPTIONS.INCLUDE_COLLECTIONS]: { type: 'string' },
+        [CLI_ARG_OPTIONS.EXCLUDE_COLLECTIONS]: { type: 'string' },
+        [CLI_ARG_OPTIONS.INCLUDE_TOOLS]: { type: 'string' },
+        [CLI_ARG_OPTIONS.EXCLUDE_TOOLS]: { type: 'string' },
+        [CLI_ARG_OPTIONS.VERBOSE]: { type: 'boolean' },
+        [CLI_ARG_OPTIONS.LOGOUT]: { type: 'boolean' },
+        [CLI_ARG_OPTIONS.HELP]: { type: 'boolean' },
+      } as const,
+      strict: true,
+      allowPositionals: true,
+    });
+  } catch (error) {
+    logger.error(error instanceof Error ? error.message : String(error));
+    logger.error('Run with --help for more information.');
+    process.exit(1);
+  }
+
+  const { values, positionals } = parsed;
+  const isHelpRequested = !!values[CLI_ARG_OPTIONS.HELP];
+  const command = positionals[0];
+
+  if (isHelpRequested || !command) {
+    logger.printCliOutput(HELP_TEXT);
+    process.exit(0);
+  }
+
+  if (command !== 'start') {
+    logger.error(`Unknown command "${command}"`);
+    logger.error('Run with --help for more information.');
+    process.exit(1);
+  }
 
   const verbose = !!values[CLI_ARG_OPTIONS.VERBOSE];
 
@@ -78,7 +114,9 @@ export const getCliConfig = (): McpServerConfig => {
   if (!rootDomain) missingVars.push('ROOT_DOMAIN');
 
   if (missingVars.length > 0) {
-    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    logger.error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    logger.error('Run with --help for more information.');
+    process.exit(1);
   }
 
   return {
