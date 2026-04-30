@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
 import { getCliConfig, createToolFilter } from '../../src/configs/settings.js';
 import { TOOL_NAMES, COLLECTION_NAMES } from '../../src/utils/constants.js';
 import type { ToolName } from '../../src/utils/constants.js';
@@ -136,8 +136,22 @@ describe('getCliConfig', () => {
     'ROOT_DOMAIN',
     'CUSTOM_DOMAIN',
   ];
+  const savedArgv = process.argv;
+
+  beforeEach(() => {
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`process.exit: ${code}`);
+    }) as unknown as never;
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    for (const key of envKeys) {
+      savedEnv[key] = process.env[key];
+    }
+  });
 
   afterEach(() => {
+    vi.restoreAllMocks();
+    process.argv = savedArgv;
     for (const key of envKeys) {
       if (savedEnv[key] === undefined) {
         delete process.env[key];
@@ -148,38 +162,90 @@ describe('getCliConfig', () => {
   });
 
   function setRequiredEnv() {
-    for (const key of envKeys) {
-      savedEnv[key] = process.env[key];
-    }
     process.env.AUTHORIZATION_CODE_CLIENT_ID = 'test-client-id';
     process.env.DAVINCI_MCP_ENVIRONMENT_ID = 'test-env-id';
     process.env.ROOT_DOMAIN = 'pingidentity.com';
   }
 
-  it('should throw when all required environment variables are missing', () => {
-    for (const key of envKeys) {
-      savedEnv[key] = process.env[key];
-      delete process.env[key];
-    }
-    expect(() => getCliConfig()).toThrow('Missing required environment variables');
+  it('should exit with 0 and print help when no arguments are passed', () => {
+    process.argv = ['node', 'index.js'];
+    expect(() => getCliConfig()).toThrow('process.exit: 0');
+    expect(process.exit).toHaveBeenCalledWith(0);
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
   });
 
-  it('should list all missing variables in the error message', () => {
-    for (const key of envKeys) {
-      savedEnv[key] = process.env[key];
-      delete process.env[key];
-    }
-    expect(() => getCliConfig()).toThrow(
-      /AUTHORIZATION_CODE_CLIENT_ID.*DAVINCI_MCP_ENVIRONMENT_ID.*ROOT_DOMAIN/,
+  it('should exit with 0 and print help when --help is passed', () => {
+    process.argv = ['node', 'index.js', '--help'];
+    expect(() => getCliConfig()).toThrow('process.exit: 0');
+    expect(process.exit).toHaveBeenCalledWith(0);
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+  });
+
+  it('should exit with 0 and print help when "start" and --help are passed together', () => {
+    process.argv = ['node', 'index.js', 'start', '--help'];
+    expect(() => getCliConfig()).toThrow('process.exit: 0');
+    expect(process.exit).toHaveBeenCalledWith(0);
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+  });
+
+  it('should exit with 1 and print error when an unrecognized command is passed', () => {
+    process.argv = ['node', 'index.js', 'invalid-command'];
+    expect(() => getCliConfig()).toThrow('process.exit: 1');
+    expect(process.exit).toHaveBeenCalledWith(1);
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('Error: Unknown command "invalid-command"'),
+    );
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('Run with --help for more information.'),
     );
   });
 
-  it('should not throw when all required variables are set', () => {
+  it('should exit with 1 and print error when an unknown flag is passed', () => {
+    process.argv = ['node', 'index.js', 'start', '--unknown-flag'];
+    expect(() => getCliConfig()).toThrow('process.exit: 1');
+    expect(process.exit).toHaveBeenCalledWith(1);
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Error: Unknown option'));
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('Run with --help for more information.'),
+    );
+  });
+
+  it('should exit with 1 when start is passed but environment variables are missing', () => {
+    process.argv = ['node', 'index.js', 'start'];
+    for (const key of envKeys) {
+      delete process.env[key];
+    }
+    expect(() => getCliConfig()).toThrow('process.exit: 1');
+    expect(process.exit).toHaveBeenCalledWith(1);
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('Error: Missing required environment variables'),
+    );
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('Run with --help for more information.'),
+    );
+  });
+
+  it('should list all missing variables in the error message', () => {
+    process.argv = ['node', 'index.js', 'start'];
+    for (const key of envKeys) {
+      delete process.env[key];
+    }
+    expect(() => getCliConfig()).toThrow('process.exit: 1');
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /AUTHORIZATION_CODE_CLIENT_ID.*DAVINCI_MCP_ENVIRONMENT_ID.*ROOT_DOMAIN/,
+      ),
+    );
+  });
+
+  it('should not exit when start command and all required variables are set', () => {
+    process.argv = ['node', 'index.js', 'start'];
     setRequiredEnv();
     expect(() => getCliConfig()).not.toThrow();
   });
 
-  it('should populate auth config from environment variables', () => {
+  it('should populate auth config from environment variables when start is used', () => {
+    process.argv = ['node', 'index.js', 'start'];
     setRequiredEnv();
     const config = getCliConfig();
     expect(config.auth).toEqual(
