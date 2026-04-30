@@ -42,6 +42,9 @@ export function registerFlowTools(
   const isIncluded = createToolFilter(config);
   const includeListFlows = isIncluded(MCP_TOOLS.LIST_FLOWS.NAME);
   const includeDescribeFlow = isIncluded(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+  const includeValidateFlow = isIncluded(MCP_TOOLS.VALIDATE_FLOW.NAME);
+  const includeFlowExecutions = isIncluded(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+  const includeFlowExecutionEvents = isIncluded(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
 
   if (!includeListFlows && !includeDescribeFlow) return;
 
@@ -94,6 +97,130 @@ export function registerFlowTools(
           throw new McpError(
             ErrorCode.InternalError,
             `Failed to describe flow: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeValidateFlow) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.VALIDATE_FLOW.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.VALIDATE_FLOW.NAME,
+      {
+        description: MCP_TOOLS.VALIDATE_FLOW.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+        }),
+      },
+      async ({ flowId }) => {
+        try {
+          await flowsClient.validateFlow(flowId);
+          const flow = await flowsClient.getFlow(flowId, { expand: 'dvlinterDetails' });
+          return {
+            content: [{ type: 'text', text: JSON.stringify(flow) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.VALIDATE_FLOW.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to validate flow: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeFlowExecutions) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
+      {
+        description: MCP_TOOLS.LIST_FLOW_EXECUTIONS.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+          transactionId: z
+            .string()
+            .optional()
+            .describe('Optional transaction ID to filter executions'),
+          cursor: z.string().optional().describe('Optional cursor for pagination'),
+        }),
+      },
+      async ({ flowId, transactionId, cursor }) => {
+        try {
+          // By default filter to last 30 days of executions
+          const now = new Date();
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+          const timestampFilter = `timestamp ge "${thirtyDaysAgo.toISOString()}" and timestamp le "${now.toISOString()}"`;
+
+          // Build filter to always include 30-day window, optionally filter by transactionId, if provided
+          const filters = [timestampFilter];
+          if (transactionId) {
+            filters.push(`transactionId eq "${transactionId}"`);
+          }
+
+          const params = {
+            limit: 500,
+            filter: filters.join(' and '),
+            ...(cursor && { cursor }),
+          };
+
+          const executions = await flowsClient.getFlowExecutions(flowId, params);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(executions) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to list flow executions: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeFlowExecutionEvents) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME,
+      {
+        description: MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+          interactionId: requiredId('interactionId'),
+          cursor: z.string().optional().describe('Optional cursor for pagination'),
+        }),
+      },
+      async ({ flowId, interactionId, cursor }) => {
+        try {
+          // By default filter to last 30 days of execution events
+          const now = new Date();
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+          const timestampFilter = `timestamp ge "${thirtyDaysAgo.toISOString()}" and timestamp le "${now.toISOString()}"`;
+
+          const params = {
+            limit: 500,
+            filter: timestampFilter,
+            ...(cursor && { cursor }),
+          };
+
+          const events = await flowsClient.getFlowExecutionEvents(flowId, interactionId, params);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(events) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to get flow execution events: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
       },

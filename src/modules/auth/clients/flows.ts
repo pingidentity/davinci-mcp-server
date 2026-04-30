@@ -34,10 +34,65 @@ export class FlowsClient extends DaVinciApiClient {
    * Retrieves details of a specific flow.
    *
    * @param flowId - The ID of the flow to retrieve.
+   * @param params - Optional query parameters to specify which attributes to return and whether to expand related resources.
    * @returns A promise that resolves to the flow details.
    */
-  async getFlow(flowId: string) {
-    const response = await this.axiosInstance.get(`/flows/${flowId}`);
+  async getFlow(flowId: string, params?: { attributes?: string; expand?: string }) {
+    const response = await this.axiosInstance.get(`/flows/${flowId}`, { params });
+    return response.data;
+  }
+
+  /**
+   * Validates a specific flow configuration.
+   *
+   * @param flowId - The ID of the flow to validate.
+   * @returns A promise that resolves to the validation results.
+   */
+  async validateFlow(flowId: string) {
+    const response = await this.axiosInstance.post(
+      `/flows/${flowId}`,
+      {},
+      {
+        headers: {
+          'content-type': 'application/vnd.pingidentity.flow.validate+json',
+        },
+      },
+    );
+    return response.data;
+  }
+
+  /**
+   * Retrieves the execution history of a specific flow.
+   *
+   * @param flowId - The ID of the flow to retrieve executions for.
+   * @param params - Optional query parameters to limit the number of results, paginate through results, or scim filter by timestamp and transactionId.
+   * @returns A promise that resolves to the list of flow executions.
+   */
+  async getFlowExecutions(
+    flowId: string,
+    params?: { limit?: number; cursor?: string; filter?: string },
+  ) {
+    const response = await this.axiosInstance.get(`/flows/${flowId}/interactions`, { params });
+    return response.data;
+  }
+
+  /**
+   * Retrieves the execution events for a specific flow interaction.
+   *
+   * @param flowId - The ID of the flow.
+   * @param interactionId - The ID of the interaction to retrieve events for.
+   * @param params - Optional query parameters to limit the number of results, paginate through results, or scim filter by timestamp and transactionId.
+   * @returns A promise that resolves to the list of flow execution events.
+   */
+  async getFlowExecutionEvents(
+    flowId: string,
+    interactionId: string,
+    params?: { limit?: number; cursor?: string; filter?: string },
+  ) {
+    const response = await this.axiosInstance.get(
+      `/flows/${flowId}/interactions/${interactionId}/events`,
+      { params },
+    );
     return response.data;
   }
 }

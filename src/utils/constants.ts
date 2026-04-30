@@ -149,6 +149,24 @@ export const MCP_TOOLS = {
       'Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Use when you need to inspect or compare a historical version of a flow. Call list_flows then list_flow_versions first to find the required IDs.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
+  VALIDATE_FLOW: {
+    NAME: 'validate_flow',
+    DESCRIPTION:
+      'Validates a DaVinci flow configuration using the DVLinter validation engine. Use this tool to check deployment readiness, identify configuration errors and warnings (best-practice violations), and troubleshoot flow issues. Analyzes nodes (connectors and capabilities), connections (connector instances), node properties, and overall structure. Returns validation results including error counts or warning counts, and specific issue descriptions. Error locations: (1) `linterError` property within each node in graphData.elements.nodes for node specific issues (2) `allLinterErrors` property in graphData for all flow-level errors and warnings. Zero errors indicates deployment-ready status. This is a read-only operation that does not modify the flow. Use list_flows to obtain the flow ID if needed.',
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+  },
+  LIST_FLOW_EXECUTIONS: {
+    NAME: 'list_flow_executions',
+    DESCRIPTION:
+      'Returns a list of all executions for a specific DaVinci flow over the past 30 days. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow runs. Supports filtering by `transactionId` to track specific execution. Use list_flows to obtain the flow ID if needed.',
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+  },
+  SUMMARIZE_FLOW_EXECUTION: {
+    NAME: 'summarize_flow_execution',
+    DESCRIPTION:
+      'Returns detailed information about a specific DaVinci flow execution including execution status (success/failure), start and end times, input and output data, error messages and stack traces, and user context. Use this tool to answer why a flow execution failed, summarize flow execution results, debug specific flow runs, verify data transformations, analyze flow execution behavior, and investigate user-specific issues. Use list_flows to obtain the flow ID, then list_flow_executions to find the execution ID, if needed.',
+    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+  },
 } as const;
 
 /**

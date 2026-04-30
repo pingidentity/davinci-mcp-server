@@ -6,7 +6,10 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that pr
 
 DaVinci is PingIdentity's no-code identity orchestration platform that allows organizations to build sophisticated identity and access management workflows. This MCP server acts as a bridge between AI assistants (like Claude, GPT, etc.) and the DaVinci API, enabling:
 
-- **Flow Management**: List and inspect identity orchestration flows
+- **Flow Management**: List, inspect, and validate identity orchestration flows
+- **Flow Versioning**: Access and compare flow versions
+- **Flow Validation**: Check flow configurations for errors and deployment readiness
+- **Flow Execution Monitoring**: View execution history and troubleshoot flow runs
 - **Application Configuration**: Access application settings and flow policies  
 - **Connector Management**: View available connectors and their configurations
 - **Variable Management**: Manage flow variables and their values
@@ -22,6 +25,11 @@ The server provides the following MCP tools:
 #### Flow Tools
 - `list_flows` - List all DaVinci flows in the environment
 - `describe_flow` - Get detailed information about a specific flow
+- `list_flow_versions` - List all versions of a specific flow
+- `describe_flow_version` - Get detailed information about a specific flow version
+- `validate_flow` - Validate a flow configuration and check deployment readiness
+- `list_flow_executions` - List all executions for a specific flow (last 30 days)
+- `summarize_flow_execution` - Get detailed execution events and summary for a specific flow run
 
 #### Application Tools  
 - `list_applications` - List all applications in the environment
