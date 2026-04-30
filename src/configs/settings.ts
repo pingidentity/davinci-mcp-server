@@ -17,6 +17,7 @@
 import { parseArgs } from 'node:util';
 import { McpServerConfig } from '../types/index.js';
 import { CLI_ARG_OPTIONS, HELP_TEXT, MCP_TOOLS, type ToolName } from '../utils/constants.js';
+import { Logger } from '../utils/logger.js';
 
 const TOOLS_BY_NAME = new Map(Object.values(MCP_TOOLS).map((tool) => [tool.NAME, tool]));
 
@@ -63,6 +64,7 @@ const splitAndTrim = (val: string | boolean | undefined): string[] =>
  * @returns A {@link McpServerConfig} object populated from CLI arguments.
  */
 export const getCliConfig = (): McpServerConfig => {
+  const logger = new Logger();
   let parsed;
   try {
     parsed = parseArgs({
@@ -80,8 +82,8 @@ export const getCliConfig = (): McpServerConfig => {
       allowPositionals: true,
     });
   } catch (error) {
-    console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
-    console.error('Run with --help for more information.');
+    logger.error(error instanceof Error ? error.message : String(error));
+    logger.error('Run with --help for more information.');
     process.exit(1);
   }
 
@@ -90,13 +92,13 @@ export const getCliConfig = (): McpServerConfig => {
   const command = positionals[0];
 
   if (isHelpRequested || !command) {
-    console.log(HELP_TEXT);
+    logger.printCliOutput(HELP_TEXT);
     process.exit(0);
   }
 
   if (command !== 'start') {
-    console.error(`Error: Unknown command "${command}"`);
-    console.error('Run with --help for more information.');
+    logger.error(`Unknown command "${command}"`);
+    logger.error('Run with --help for more information.');
     process.exit(1);
   }
 
@@ -112,8 +114,8 @@ export const getCliConfig = (): McpServerConfig => {
   if (!rootDomain) missingVars.push('ROOT_DOMAIN');
 
   if (missingVars.length > 0) {
-    console.error(`Error: Missing required environment variables: ${missingVars.join(', ')}`);
-    console.error('Run with --help for more information.');
+    logger.error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    logger.error('Run with --help for more information.');
     process.exit(1);
   }
 

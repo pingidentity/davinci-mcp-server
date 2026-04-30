@@ -16,7 +16,7 @@
 
 import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
 import { getCliConfig, createToolFilter } from '../../src/configs/settings.js';
-import { TOOL_NAMES, COLLECTION_NAMES } from '../../src/utils/constants.js';
+import { TOOL_NAMES, COLLECTION_NAMES, HELP_TEXT } from '../../src/utils/constants.js';
 import type { ToolName } from '../../src/utils/constants.js';
 
 describe('createToolFilter', () => {
@@ -171,21 +171,21 @@ describe('getCliConfig', () => {
     process.argv = ['node', 'index.js'];
     expect(() => getCliConfig()).toThrow('process.exit: 0');
     expect(process.exit).toHaveBeenCalledWith(0);
-    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+    expect(console.log).toHaveBeenCalledWith(HELP_TEXT);
   });
 
   it('should exit with 0 and print help when --help is passed', () => {
     process.argv = ['node', 'index.js', '--help'];
     expect(() => getCliConfig()).toThrow('process.exit: 0');
     expect(process.exit).toHaveBeenCalledWith(0);
-    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+    expect(console.log).toHaveBeenCalledWith(HELP_TEXT);
   });
 
   it('should exit with 0 and print help when "start" and --help are passed together', () => {
     process.argv = ['node', 'index.js', 'start', '--help'];
     expect(() => getCliConfig()).toThrow('process.exit: 0');
     expect(process.exit).toHaveBeenCalledWith(0);
-    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+    expect(console.log).toHaveBeenCalledWith(HELP_TEXT);
   });
 
   it('should exit with 1 and print error when an unrecognized command is passed', () => {
@@ -193,10 +193,10 @@ describe('getCliConfig', () => {
     expect(() => getCliConfig()).toThrow('process.exit: 1');
     expect(process.exit).toHaveBeenCalledWith(1);
     expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('Error: Unknown command "invalid-command"'),
+      expect.stringContaining('[ERROR] Unknown command "invalid-command"'),
     );
     expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('Run with --help for more information.'),
+      expect.stringContaining('[ERROR] Run with --help for more information.'),
     );
   });
 
@@ -204,9 +204,9 @@ describe('getCliConfig', () => {
     process.argv = ['node', 'index.js', 'start', '--unknown-flag'];
     expect(() => getCliConfig()).toThrow('process.exit: 1');
     expect(process.exit).toHaveBeenCalledWith(1);
-    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Error: Unknown option'));
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('[ERROR] Unknown option'));
     expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('Run with --help for more information.'),
+      expect.stringContaining('[ERROR] Run with --help for more information.'),
     );
   });
 
@@ -218,10 +218,10 @@ describe('getCliConfig', () => {
     expect(() => getCliConfig()).toThrow('process.exit: 1');
     expect(process.exit).toHaveBeenCalledWith(1);
     expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('Error: Missing required environment variables'),
+      expect.stringContaining('[ERROR] Missing required environment variables'),
     );
     expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('Run with --help for more information.'),
+      expect.stringContaining('[ERROR] Run with --help for more information.'),
     );
   });
 
