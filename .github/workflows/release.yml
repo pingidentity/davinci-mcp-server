@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
@@ -64,7 +64,6 @@ jobs:
       
       - name: Publish to npm
         env:
-          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/publish.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
           npm publish ${{ steps.version.outputs.prerelease == 'true' && '--tag beta' || '' }} --access public --provenance
