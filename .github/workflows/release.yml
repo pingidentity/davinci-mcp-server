@@ -63,5 +63,7 @@ jobs:
             SHA256SUMS.txt
       
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ''
         run: |
           npm publish ${{ steps.version.outputs.prerelease == 'true' && '--tag beta' || '' }} --access public --provenance
