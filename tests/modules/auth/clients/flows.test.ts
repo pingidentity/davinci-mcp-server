@@ -70,8 +70,18 @@ describe('FlowsClient', () => {
 
     const result = await client.listFlows();
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/flows');
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows', { params: undefined });
     expect(result).toEqual(mockFlows);
+  });
+
+  it('should forward query params to GET /flows when provided', async () => {
+    axiosInstance.get.mockResolvedValue({ data: [] });
+
+    await client.listFlows({ attributes: 'id,name' });
+
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows', {
+      params: { attributes: 'id,name' },
+    });
   });
 
   it('should call GET /flows/:flowId for getFlow', async () => {
@@ -80,8 +90,18 @@ describe('FlowsClient', () => {
 
     const result = await client.getFlow('flow-123');
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123');
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123', { params: undefined });
     expect(result).toEqual(mockFlow);
+  });
+
+  it('should forward query params to GET /flows/:flowId when provided', async () => {
+    axiosInstance.get.mockResolvedValue({ data: {} });
+
+    await client.getFlow('flow-123', { attributes: 'id,name' });
+
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123', {
+      params: { attributes: 'id,name' },
+    });
   });
 
   it('should propagate errors from listFlows', async () => {

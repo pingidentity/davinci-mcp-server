@@ -18,12 +18,12 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS } from '../utils/constants.js';
+import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
 import { createToolFilter } from '../configs/settings.js';
 import { VariablesClient } from '../modules/auth/clients/variables.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
-import { requiredId } from '../utils/schemas.js';
+import { optionalInt, optionalString, pickDefined, requiredId } from '../utils/schemas.js';
 
 /**
  * Registers variable-related MCP tools.
@@ -48,10 +48,19 @@ export function registerVariableTools(
       MCP_TOOLS.LIST_VARIABLES.NAME,
       {
         description: MCP_TOOLS.LIST_VARIABLES.DESCRIPTION,
+        inputSchema: z.object({
+          limit: optionalInt({
+            min: 1,
+            max: 50,
+            description: QUERY_PARAM_DESCRIPTIONS.VARIABLES_LIMIT,
+          }),
+          cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.VARIABLES_CURSOR),
+          filter: optionalString(QUERY_PARAM_DESCRIPTIONS.VARIABLES_FILTER),
+        }),
       },
-      async () => {
+      async ({ limit, cursor, filter }) => {
         try {
-          const variables = await client.listVariables();
+          const variables = await client.listVariables(pickDefined({ limit, cursor, filter }));
           return {
             content: [
               {

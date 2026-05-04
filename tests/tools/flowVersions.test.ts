@@ -204,8 +204,46 @@ describe('registerFlowVersionTools', () => {
     });
 
     expect(mockFlowVersionsClient.getFlowVersion).toHaveBeenCalledWith('flow-123', '3');
-    expect(mockFlowVersionsClient.getFlowVersionDetails).toHaveBeenCalledWith('flow-123', '3');
+    expect(mockFlowVersionsClient.getFlowVersionDetails).toHaveBeenCalledWith(
+      'flow-123',
+      '3',
+      undefined,
+    );
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(expected) }]);
+  });
+
+  it('should forward expand query param to describe_flow_version', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockFlowVersionsClient.getFlowVersion.mockResolvedValue({});
+    mockFlowVersionsClient.getFlowVersionDetails.mockResolvedValue({});
+
+    await client.callTool({
+      name: MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
+      arguments: { flowId: 'flow-123', versionId: '3', expand: 'skcomponents' },
+    });
+
+    expect(mockFlowVersionsClient.getFlowVersion).toHaveBeenCalledWith('flow-123', '3');
+    expect(mockFlowVersionsClient.getFlowVersionDetails).toHaveBeenCalledWith('flow-123', '3', {
+      expand: 'skcomponents',
+    });
+  });
+
+  it('should pass undefined to getFlowVersionDetails when expand is omitted', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockFlowVersionsClient.getFlowVersion.mockResolvedValue({});
+    mockFlowVersionsClient.getFlowVersionDetails.mockResolvedValue({});
+
+    await client.callTool({
+      name: MCP_TOOLS.DESCRIBE_FLOW_VERSION.NAME,
+      arguments: { flowId: 'flow-123', versionId: '3' },
+    });
+
+    expect(mockFlowVersionsClient.getFlowVersion).toHaveBeenCalledWith('flow-123', '3');
+    expect(mockFlowVersionsClient.getFlowVersionDetails).toHaveBeenCalledWith(
+      'flow-123',
+      '3',
+      undefined,
+    );
   });
 
   it('should throw McpError when describe_flow_version fails with generic error', async () => {

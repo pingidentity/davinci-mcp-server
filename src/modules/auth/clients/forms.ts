@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { QueryParams } from '../../../types/index.js';
 import { DaVinciApiClient } from './davinci.js';
 
 /**
@@ -23,10 +24,14 @@ export class FormsClient extends DaVinciApiClient {
   /**
    * Retrieves a list of all forms in the current environment.
    *
+   * @param params - Optional query parameters.
+   * @param params.filter - SCIM filter on `category` using `eq`. Valid values:
+   *   `PROGRESSIVE_PROFILING`, `SELF_SERVICE`, `CUSTOM`, `EXPERIENCES`.
+   *   Example: `category eq "CUSTOM"`.
    * @returns A promise that resolves to the list of forms.
    */
-  async listForms() {
-    const response = await this.axiosInstance.get('/forms');
+  async listForms(params?: QueryParams) {
+    const response = await this.axiosInstance.get('/forms', { params });
     return response.data;
   }
 

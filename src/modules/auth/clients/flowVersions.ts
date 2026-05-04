@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { QueryParams } from '../../../types/index.js';
 import { DaVinciApiClient } from './davinci.js';
 
 /**
@@ -49,10 +50,16 @@ export class FlowVersionsClient extends DaVinciApiClient {
    *
    * @param flowId - The ID of the flow.
    * @param versionId - The ID of the version to retrieve details for.
+   * @param params - Optional query parameters.
+   * @param params.expand - Comma-separated list of fields to expand inline
+   *   (e.g. `"skcomponents"`).
    * @returns A promise that resolves to the flow version details.
    */
-  async getFlowVersionDetails(flowId: string, versionId: string) {
-    const response = await this.axiosInstance.get(`/flows/${flowId}/versions/${versionId}/details`);
+  async getFlowVersionDetails(flowId: string, versionId: string, params?: QueryParams) {
+    const response = await this.axiosInstance.get(
+      `/flows/${flowId}/versions/${versionId}/details`,
+      { params },
+    );
     return response.data;
   }
 }

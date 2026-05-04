@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { QueryParams } from '../../../types/index.js';
 import { DaVinciApiClient } from './davinci.js';
 
 /**
@@ -23,10 +24,17 @@ export class VariablesClient extends DaVinciApiClient {
   /**
    * Retrieves a list of all variables in the current environment.
    *
+   * @param params - Optional query parameters.
+   * @param params.limit - Maximum number of resources to return per page (1-50, default 10).
+   * @param params.cursor - Opaque pagination cursor from the `next` link of a previous response.
+   * @param params.filter - SCIM filter (RFC 7644 Section 3.4.2.2). Filterable
+   *   attributes and supported comparison operators: `context` (eq, sw, co, ew),
+   *   `name` (eq, sw, co, ew), `createdAt` and `updatedAt` (eq, gt, ge, lt, le).
+   *   Clauses may be combined with the logical operators `and` / `or`.
    * @returns A promise that resolves to the list of variables.
    */
-  async listVariables() {
-    const response = await this.axiosInstance.get('/variables');
+  async listVariables(params?: QueryParams) {
+    const response = await this.axiosInstance.get('/variables', { params });
     return response.data;
   }
 

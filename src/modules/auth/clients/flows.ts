@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { QueryParams } from '../../../types/index.js';
 import { DaVinciApiClient } from './davinci.js';
 
 /**
@@ -23,10 +24,13 @@ export class FlowsClient extends DaVinciApiClient {
   /**
    * Retrieves a list of all flows in the current environment.
    *
+   * @param params - Optional query parameters.
+   * @param params.attributes - Comma-separated list of top-level FlowResponse
+   *   attributes to include in the response.
    * @returns A promise that resolves to the list of flows.
    */
-  async listFlows() {
-    const response = await this.axiosInstance.get('/flows');
+  async listFlows(params?: QueryParams) {
+    const response = await this.axiosInstance.get('/flows', { params });
     return response.data;
   }
 
@@ -34,10 +38,13 @@ export class FlowsClient extends DaVinciApiClient {
    * Retrieves details of a specific flow.
    *
    * @param flowId - The ID of the flow to retrieve.
+   * @param params - Optional query parameters.
+   * @param params.attributes - Comma-separated list of top-level FlowResponse
+   *   attributes to include in the response.
    * @returns A promise that resolves to the flow details.
    */
-  async getFlow(flowId: string) {
-    const response = await this.axiosInstance.get(`/flows/${flowId}`);
+  async getFlow(flowId: string, params?: QueryParams) {
+    const response = await this.axiosInstance.get(`/flows/${flowId}`, { params });
     return response.data;
   }
 }
