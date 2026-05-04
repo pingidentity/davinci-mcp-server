@@ -474,33 +474,76 @@ describe('registerFlowTools', () => {
       arguments: { flowId: 'flow-123' },
     });
 
-    expect(mockFlowsClient.getFlowExecutions).toHaveBeenCalledWith(
-      'flow-123',
-      expect.objectContaining({
-        limit: 500,
-        filter: expect.stringContaining('timestamp ge'),
-      }),
-    );
+    expect(mockFlowsClient.getFlowExecutions).toHaveBeenCalledWith('flow-123', {
+      limit: 500,
+    });
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockExecutions) }]);
   });
 
-  it('should include transactionId filter when provided to list_flow_executions', async () => {
+  it('should include filter when provided to list_flow_executions', async () => {
     await setupServerAndClient({ auth: mockAuth });
     const mockExecutions = [{ id: 'exec-1', flowId: 'flow-123', transactionId: 'txn-123' }];
     mockFlowsClient.getFlowExecutions.mockResolvedValue(mockExecutions);
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
-      arguments: { flowId: 'flow-123', transactionId: 'txn-123' },
+      arguments: { flowId: 'flow-123', filter: 'transactionId eq "txn-123"' },
     });
 
-    expect(mockFlowsClient.getFlowExecutions).toHaveBeenCalledWith(
-      'flow-123',
-      expect.objectContaining({
-        limit: 500,
-        filter: expect.stringMatching(/timestamp ge.*and.*transactionId eq "txn-123"/),
-      }),
-    );
+    expect(mockFlowsClient.getFlowExecutions).toHaveBeenCalledWith('flow-123', {
+      limit: 500,
+      filter: 'transactionId eq "txn-123"',
+    });
+    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockExecutions) }]);
+  });
+
+  it('should include timestamp filter when provided to list_flow_executions', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    const mockExecutions = [
+      { id: 'exec-1', flowId: 'flow-123', timestamp: '2026-04-01T10:00:00Z' },
+      { id: 'exec-2', flowId: 'flow-123', timestamp: '2026-04-02T10:00:00Z' },
+    ];
+    mockFlowsClient.getFlowExecutions.mockResolvedValue(mockExecutions);
+
+    const timestampFilter =
+      'timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-04-30T23:59:59Z"';
+
+    const result = await client.callTool({
+      name: MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
+      arguments: { flowId: 'flow-123', filter: timestampFilter },
+    });
+
+    expect(mockFlowsClient.getFlowExecutions).toHaveBeenCalledWith('flow-123', {
+      limit: 500,
+      filter: timestampFilter,
+    });
+    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockExecutions) }]);
+  });
+
+  it('should include combined timestamp and transactionId filter when provided to list_flow_executions', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    const mockExecutions = [
+      {
+        id: 'exec-1',
+        flowId: 'flow-123',
+        transactionId: 'txn-123',
+        timestamp: '2026-04-15T10:00:00Z',
+      },
+    ];
+    mockFlowsClient.getFlowExecutions.mockResolvedValue(mockExecutions);
+
+    const combinedFilter =
+      'timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-04-30T23:59:59Z" and transactionId eq "txn-123"';
+
+    const result = await client.callTool({
+      name: MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
+      arguments: { flowId: 'flow-123', filter: combinedFilter },
+    });
+
+    expect(mockFlowsClient.getFlowExecutions).toHaveBeenCalledWith('flow-123', {
+      limit: 500,
+      filter: combinedFilter,
+    });
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockExecutions) }]);
   });
 
@@ -583,10 +626,40 @@ describe('registerFlowTools', () => {
     expect(mockFlowsClient.getFlowExecutionEvents).toHaveBeenCalledWith(
       'flow-123',
       'interaction-456',
-      expect.objectContaining({
+      {
         limit: 500,
-        filter: expect.stringContaining('timestamp ge'),
-      }),
+      },
+    );
+    expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockEvents) }]);
+  });
+
+  it('should include timestamp filter when provided to summarize_flow_execution', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    const mockEvents = [
+      { id: 'event-1', type: 'start', timestamp: '2026-04-15T10:00:00Z' },
+      { id: 'event-2', type: 'end', timestamp: '2026-04-15T10:00:05Z' },
+    ];
+    mockFlowsClient.getFlowExecutionEvents.mockResolvedValue(mockEvents);
+
+    const timestampFilter =
+      'timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-04-30T23:59:59Z"';
+
+    const result = await client.callTool({
+      name: MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME,
+      arguments: {
+        flowId: 'flow-123',
+        interactionId: 'interaction-456',
+        filter: timestampFilter,
+      },
+    });
+
+    expect(mockFlowsClient.getFlowExecutionEvents).toHaveBeenCalledWith(
+      'flow-123',
+      'interaction-456',
+      {
+        limit: 500,
+        filter: timestampFilter,
+      },
     );
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockEvents) }]);
   });

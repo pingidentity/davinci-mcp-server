@@ -18,6 +18,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import { FlowsClient } from '../../../../src/modules/auth/clients/flows.js';
 import { AuthManager } from '../../../../src/modules/auth/manager.js';
+import { CUSTOM_CONTENT_TYPES } from '../../../../src/utils/constants.js';
 
 vi.mock('axios', () => {
   const mockAxiosInstance = {
@@ -141,15 +142,11 @@ describe('FlowsClient', () => {
 
     const result = await client.validateFlow('flow-123');
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(
-      '/flows/flow-123',
-      {},
-      {
-        headers: {
-          'content-type': 'application/vnd.pingidentity.flow.validate+json',
-        },
+    expect(axiosInstance.post).toHaveBeenCalledWith('/flows/flow-123', null, {
+      headers: {
+        'content-type': CUSTOM_CONTENT_TYPES.FLOW_VALIDATE,
       },
-    );
+    });
     expect(result).toEqual(mockValidationResult);
   });
 

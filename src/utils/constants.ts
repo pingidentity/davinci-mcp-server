@@ -191,13 +191,13 @@ export const MCP_TOOLS = {
   LIST_FLOW_EXECUTIONS: {
     NAME: 'list_flow_executions',
     DESCRIPTION:
-      'Returns a list of all executions for a specific DaVinci flow over the past 30 days. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow runs. Supports filtering by `transactionId` to track specific execution. Use list_flows to obtain the flow ID if needed.',
+      'Returns a list of all executions for a specific DaVinci flow. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow executions. Use list_flows to obtain the flow ID, if needed. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates, `transactionId` (eq) for specific transaction details.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   SUMMARIZE_FLOW_EXECUTION: {
     NAME: 'summarize_flow_execution',
     DESCRIPTION:
-      'Returns detailed information about a specific DaVinci flow execution including execution status (success/failure), start and end times, input and output data, error messages and stack traces, and user context. Use this tool to answer why a flow execution failed, summarize flow execution results, debug specific flow runs, verify data transformations, analyze flow execution behavior, and investigate user-specific issues. Use list_flows to obtain the flow ID, then list_flow_executions to find the execution ID, if needed.',
+      'Returns detailed information about a specific DaVinci flow execution with status (success/failure), timestamps, input/output data, errors with stack traces, and user context. Use this tool to debug failures, summarize flow execution results, analyze execution behavior, verify data transformations, or investigate user-specific issues. Use list_flows to get flow ID, then list_flow_executions to get execution ID, if needed. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
 } as const;
@@ -219,6 +219,8 @@ export type ToolName = (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES];
 export const QUERY_PARAM_DESCRIPTIONS = {
   FLOWS_ATTRIBUTES:
     'Optional. Comma-separated list of top-level FlowResponse attributes to return (other attributes are omitted).',
+  FLOWS_EXPAND:
+    'Optional. Comma-separated list of related resources to expand inline in the response (e.g. "dvlinterDetails" to include linter details in flow response).',
   FLOW_VERSION_EXPAND:
     'Optional. Comma-separated list of fields to expand in the version details response (e.g. "skcomponents").',
   VARIABLES_LIMIT:
@@ -229,6 +231,18 @@ export const QUERY_PARAM_DESCRIPTIONS = {
     'Optional. SCIM filter (RFC 7644 Section 3.4.2.2). Filterable attributes and the comparison operators supported per attribute: context (eq, sw, co, ew), name (eq, sw, co, ew), createdAt (eq, gt, ge, lt, le), updatedAt (eq, gt, ge, lt, le). Clauses may be combined with the logical operators `and` and `or`.',
   FORMS_FILTER:
     'Optional. SCIM filter on category using eq operator. Valid values: PROGRESSIVE_PROFILING, SELF_SERVICE, CUSTOM, EXPERIENCES. Example: category eq "CUSTOM".',
+  FLOW_EXECUTIONS_LIMIT:
+    'Optional. Maximum number of flow executions to return per page (1-500, default is 500 when omitted).',
+  FLOW_EXECUTIONS_CURSOR:
+    'Optional. Opaque pagination cursor from the "next" link of a previous response.',
+  FLOW_EXECUTIONS_FILTER:
+    'Optional. SCIM filter to narrow results. Supports: transactionId eq "value", timestamp ge "ISO8601", timestamp le "ISO8601". Combine with and/or operators. Example: timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-05-01T00:00:00Z".',
+  FLOW_EXECUTION_EVENTS_LIMIT:
+    'Optional. Maximum number of flow execution events to return per page (1-500, default is 500 when omitted).',
+  FLOW_EXECUTION_EVENTS_CURSOR:
+    'Optional. Opaque pagination cursor from the "next" link of a previous response.',
+  FLOW_EXECUTION_EVENTS_FILTER:
+    'Optional. SCIM filter to narrow results. Supports: timestamp ge "ISO8601", timestamp le "ISO8601". Combine with and/or operators. Example: timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-05-01T00:00:00Z".',
 } as const;
 
 export const AUTH_PORT = 7474;
@@ -239,4 +253,8 @@ export const AUTH_CODE_MAX_LENGTH = 2048;
 export const OS_KEYCHAIN = {
   SERVICE_NAME: 'davinci-mcp-server',
   ACCOUNT_NAME: 'davinci-tokens',
+} as const;
+
+export const CUSTOM_CONTENT_TYPES = {
+  FLOW_VALIDATE: 'application/vnd.pingidentity.flow.validate+json',
 } as const;

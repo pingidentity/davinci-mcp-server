@@ -18,7 +18,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
 import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
-import { optionalString, pickDefined, requiredId } from '../utils/schemas.js';
+import { optionalString, pickDefined, requiredId, optionalInt } from '../utils/schemas.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FlowsClient } from '../modules/auth/clients/flows.js';
 import { AuthManager } from '../modules/auth/manager.js';
@@ -87,6 +87,7 @@ export function registerFlowTools(
         inputSchema: z.object({
           flowId: requiredId('flowId'),
           attributes: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_ATTRIBUTES),
+          expand: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_EXPAND),
         }),
       },
       async ({ flowId, attributes }) => {
@@ -144,33 +145,22 @@ export function registerFlowTools(
         description: MCP_TOOLS.LIST_FLOW_EXECUTIONS.DESCRIPTION,
         inputSchema: z.object({
           flowId: requiredId('flowId'),
-          transactionId: z
-            .string()
-            .optional()
-            .describe('Optional transaction ID to filter executions'),
-          cursor: z.string().optional().describe('Optional cursor for pagination'),
+          cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_CURSOR),
+          filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_FILTER),
+          limit: optionalInt({
+            min: 100,
+            max: 500,
+            description: QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_LIMIT,
+          }),
         }),
       },
-      async ({ flowId, transactionId, cursor }) => {
+      async ({ flowId, limit, cursor, filter }) => {
         try {
-          // By default filter to last 30 days of executions
-          const now = new Date();
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-          const timestampFilter = `timestamp ge "${thirtyDaysAgo.toISOString()}" and timestamp le "${now.toISOString()}"`;
-
-          // Build filter to always include 30-day window, optionally filter by transactionId, if provided
-          const filters = [timestampFilter];
-          if (transactionId) {
-            filters.push(`transactionId eq "${transactionId}"`);
-          }
-
-          const params = {
-            limit: 500,
-            filter: filters.join(' and '),
-            ...(cursor && { cursor }),
-          };
+          const params = pickDefined({
+            limit: limit ?? 500,
+            filter,
+            cursor,
+          });
 
           const executions = await flowsClient.getFlowExecutions(flowId, params);
           return {
@@ -197,23 +187,22 @@ export function registerFlowTools(
         inputSchema: z.object({
           flowId: requiredId('flowId'),
           interactionId: requiredId('interactionId'),
-          cursor: z.string().optional().describe('Optional cursor for pagination'),
+          cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_CURSOR),
+          filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_FILTER),
+          limit: optionalInt({
+            min: 100,
+            max: 500,
+            description: QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_LIMIT,
+          }),
         }),
       },
-      async ({ flowId, interactionId, cursor }) => {
+      async ({ flowId, interactionId, limit, cursor, filter }) => {
         try {
-          // By default filter to last 30 days of execution events
-          const now = new Date();
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-          const timestampFilter = `timestamp ge "${thirtyDaysAgo.toISOString()}" and timestamp le "${now.toISOString()}"`;
-
-          const params = {
-            limit: 500,
-            filter: timestampFilter,
-            ...(cursor && { cursor }),
-          };
+          const params = pickDefined({
+            limit: limit ?? 500,
+            filter,
+            cursor,
+          });
 
           const events = await flowsClient.getFlowExecutionEvents(flowId, interactionId, params);
           return {
