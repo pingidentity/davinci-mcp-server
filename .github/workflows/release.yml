@@ -64,6 +64,7 @@ jobs:
       
       - name: Publish to npm
         env:
-          NODE_AUTH_TOKEN: ''
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/publish.npmrc
         run: |
+          echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
           npm publish ${{ steps.version.outputs.prerelease == 'true' && '--tag beta' || '' }} --access public --provenance
