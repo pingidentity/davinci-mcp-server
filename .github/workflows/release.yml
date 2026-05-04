@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
       - run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       - run: npm ci
@@ -62,7 +63,5 @@ jobs:
             SHA256SUMS.txt
       
       - name: Publish to npm
-        env:                                                                                                                                                           
-          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org' 
         run: |
           npm publish ${{ steps.version.outputs.prerelease == 'true' && '--tag beta' || '' }} --access public --provenance
