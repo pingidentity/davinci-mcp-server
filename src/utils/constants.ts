@@ -113,7 +113,7 @@ export const MCP_TOOLS = {
   LIST_VARIABLES: {
     NAME: 'list_variables',
     DESCRIPTION:
-      'Returns a list of all DaVinci variables. Use for discovery and finding variable IDs. Results are paginated.',
+      'Returns a list of all DaVinci variables. Use for discovery and finding variable IDs. Results are paginated; supports `limit` and `cursor` for paging and a SCIM `filter` to narrow results.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_VARIABLE: {
@@ -125,7 +125,7 @@ export const MCP_TOOLS = {
   LIST_FORMS: {
     NAME: 'list_forms',
     DESCRIPTION:
-      'Returns a list of all DaVinci forms. Use for discovery and finding form IDs. Use describe_form for field-level details.',
+      'Returns a list of all DaVinci forms. Use for discovery and finding form IDs. Use describe_form for field-level details. Supports a SCIM `filter` on `category` (eq).',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FORM: {
@@ -161,13 +161,13 @@ export const MCP_TOOLS = {
   LIST_FLOWS: {
     NAME: 'list_flows',
     DESCRIPTION:
-      'Returns a list of all DaVinci flows. Use for discovery, finding flow IDs, and checking deployed vs draft status. Use describe_flow for full node-level graph details.',
+      'Returns a list of all DaVinci flows. Use for discovery, finding flow IDs, and checking deployed vs draft status. Use describe_flow for full node-level graph details. Supports `attributes` to project the response to specific top-level fields. Flow type is derived from the `trigger` field: no trigger = standard flow; trigger.type "AUTHENTICATION" = PingOne flow; trigger.type "AUTHENTICATION" + trigger.subtype "CIBA" = CIBA flow; trigger.type "SCHEDULE" = scheduled flow; trigger.type "BATCH_PROCESSING_SUBFLOW" = batch processing subflow. `readOnly: true` means the flow is read-only.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   DESCRIBE_FLOW: {
     NAME: 'describe_flow',
     DESCRIPTION:
-      "Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow's internal logic. Call list_flows first to find the ID.",
+      "Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow's internal logic. Call list_flows first to find the ID. Supports `attributes` to project the response to specific top-level fields. See list_flows for flow type derivation.",
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FLOW_VERSIONS: {
@@ -179,7 +179,7 @@ export const MCP_TOOLS = {
   DESCRIBE_FLOW_VERSION: {
     NAME: 'describe_flow_version',
     DESCRIPTION:
-      'Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Use when you need to inspect or compare a historical version of a flow. Call list_flows then list_flow_versions first to find the required IDs.',
+      'Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Use when you need to inspect or compare a historical version of a flow. Call list_flows then list_flow_versions first to find the required IDs. Supports `expand` to include related fields inline (e.g. "skcomponents").',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
 } as const;
@@ -194,6 +194,24 @@ export const TOOL_NAMES = Object.fromEntries(
 ) as { [K in keyof typeof MCP_TOOLS]: (typeof MCP_TOOLS)[K]['NAME'] };
 
 export type ToolName = (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES];
+
+/**
+ * Descriptions for optional query parameters exposed by tool input schemas.
+ */
+export const QUERY_PARAM_DESCRIPTIONS = {
+  FLOWS_ATTRIBUTES:
+    'Optional. Comma-separated list of top-level FlowResponse attributes to return (other attributes are omitted).',
+  FLOW_VERSION_EXPAND:
+    'Optional. Comma-separated list of fields to expand in the version details response (e.g. "skcomponents").',
+  VARIABLES_LIMIT:
+    'Optional. Maximum number of variables to return per page (1-50, default is 10 when omitted).',
+  VARIABLES_CURSOR:
+    'Optional. Opaque pagination cursor from the "next" link of a previous response.',
+  VARIABLES_FILTER:
+    'Optional. SCIM filter (RFC 7644 Section 3.4.2.2). Filterable attributes and the comparison operators supported per attribute: context (eq, sw, co, ew), name (eq, sw, co, ew), createdAt (eq, gt, ge, lt, le), updatedAt (eq, gt, ge, lt, le). Clauses may be combined with the logical operators `and` and `or`.',
+  FORMS_FILTER:
+    'Optional. SCIM filter on category using eq operator. Valid values: PROGRESSIVE_PROFILING, SELF_SERVICE, CUSTOM, EXPERIENCES. Example: category eq "CUSTOM".',
+} as const;
 
 export const AUTH_PORT = 7474;
 export const REDIRECT_URI = `http://127.0.0.1:${AUTH_PORT}/callback`;

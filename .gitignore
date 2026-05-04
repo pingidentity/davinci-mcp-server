@@ -25,3 +25,6 @@ npm-debug.log*
 
 # VSCode settings
 .vscode/
+
+# Claude
+.claude

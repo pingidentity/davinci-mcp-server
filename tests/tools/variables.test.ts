@@ -151,10 +151,39 @@ describe('registerVariableTools', () => {
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_VARIABLES.NAME,
+      arguments: {},
     });
 
-    expect(mockVariablesClient.listVariables).toHaveBeenCalled();
+    expect(mockVariablesClient.listVariables).toHaveBeenCalledWith(undefined);
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockData) }]);
+  });
+
+  it('should forward cursor, limit, and filter query params to list_variables', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockVariablesClient.listVariables.mockResolvedValue([]);
+
+    await client.callTool({
+      name: MCP_TOOLS.LIST_VARIABLES.NAME,
+      arguments: { limit: 50, cursor: 'abc', filter: 'name eq "foo"' },
+    });
+
+    expect(mockVariablesClient.listVariables).toHaveBeenCalledWith({
+      limit: 50,
+      cursor: 'abc',
+      filter: 'name eq "foo"',
+    });
+  });
+
+  it('should forward only provided params to list_variables (partial combination)', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockVariablesClient.listVariables.mockResolvedValue([]);
+
+    await client.callTool({
+      name: MCP_TOOLS.LIST_VARIABLES.NAME,
+      arguments: { cursor: 'abc' },
+    });
+
+    expect(mockVariablesClient.listVariables).toHaveBeenCalledWith({ cursor: 'abc' });
   });
 
   it('should return an error when list_variables fails with generic error', async () => {
@@ -163,6 +192,7 @@ describe('registerVariableTools', () => {
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_VARIABLES.NAME,
+      arguments: {},
     });
 
     expect(result.isError).toBe(true);
@@ -176,6 +206,7 @@ describe('registerVariableTools', () => {
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_VARIABLES.NAME,
+      arguments: {},
     });
 
     expect(result.isError).toBe(true);

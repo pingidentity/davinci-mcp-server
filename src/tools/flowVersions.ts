@@ -17,8 +17,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS } from '../utils/constants.js';
-import { requiredId } from '../utils/schemas.js';
+import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
+import { optionalString, pickDefined, requiredId } from '../utils/schemas.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FlowVersionsClient } from '../modules/auth/clients/flowVersions.js';
 import { AuthManager } from '../modules/auth/manager.js';
@@ -84,14 +84,17 @@ export function registerFlowVersionTools(
         inputSchema: z.object({
           flowId: requiredId('flowId'),
           versionId: requiredId('versionId'),
+          expand: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_VERSION_EXPAND),
         }),
       },
-      async ({ flowId, versionId }) => {
+      async ({ flowId, versionId, expand }) => {
         try {
           const flowVersion = await flowVersionsClient.getFlowVersion(flowId, versionId);
+          // expand is only supported by the /details endpoint, not the base version endpoint
           const flowVersionDetails = await flowVersionsClient.getFlowVersionDetails(
             flowId,
             versionId,
+            pickDefined({ expand }),
           );
           const result = { ...flowVersion, ...flowVersionDetails };
           return {

@@ -70,8 +70,18 @@ describe('FormsClient', () => {
 
     const result = await client.listForms();
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/forms');
+    expect(axiosInstance.get).toHaveBeenCalledWith('/forms', { params: undefined });
     expect(result).toEqual(mockForms);
+  });
+
+  it('should forward filter query param to GET /forms when provided', async () => {
+    axiosInstance.get.mockResolvedValue({ data: [] });
+
+    await client.listForms({ filter: 'category eq "CUSTOM"' });
+
+    expect(axiosInstance.get).toHaveBeenCalledWith('/forms', {
+      params: { filter: 'category eq "CUSTOM"' },
+    });
   });
 
   it('should call GET /forms/{formId} for describeForm', async () => {

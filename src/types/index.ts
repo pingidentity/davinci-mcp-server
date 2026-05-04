@@ -17,6 +17,15 @@
 import { AuthConfig } from './auth/manager.js';
 
 /**
+ * Query parameter bag forwarded to axios as the `params` option.
+ *
+ * Values are constrained to primitives that axios can serialize into a
+ * query string without custom handling. Used by client methods that expose
+ * optional query parameters (e.g. `attributes`, `cursor`, `filter`, `limit`).
+ */
+export type QueryParams = Record<string, string | number | boolean>;
+
+/**
  * Configuration options for the DaVinci MCP server.
  */
 export interface McpServerConfig {

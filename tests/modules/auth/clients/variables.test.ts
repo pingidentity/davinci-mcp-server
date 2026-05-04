@@ -64,8 +64,18 @@ describe('VariablesClient', () => {
 
     const result = await client.listVariables();
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/variables');
+    expect(axiosInstance.get).toHaveBeenCalledWith('/variables', { params: undefined });
     expect(result).toEqual(mockVariables);
+  });
+
+  it('should forward query params to GET /variables when provided', async () => {
+    axiosInstance.get.mockResolvedValue({ data: [] });
+
+    await client.listVariables({ limit: 25, cursor: 'abc', filter: 'name eq "foo"' });
+
+    expect(axiosInstance.get).toHaveBeenCalledWith('/variables', {
+      params: { limit: 25, cursor: 'abc', filter: 'name eq "foo"' },
+    });
   });
 
   it('should call GET /variables/{variableId} for describeVariable', async () => {

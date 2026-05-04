@@ -18,12 +18,12 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS } from '../utils/constants.js';
+import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FormsClient } from '../modules/auth/clients/forms.js';
 import { AuthManager } from '../modules/auth/manager.js';
 import { Logger } from '../utils/logger.js';
-import { requiredId } from '../utils/schemas.js';
+import { optionalString, pickDefined, requiredId } from '../utils/schemas.js';
 
 /**
  * Registers form-related MCP tools.
@@ -48,10 +48,13 @@ export function registerFormTools(
       MCP_TOOLS.LIST_FORMS.NAME,
       {
         description: MCP_TOOLS.LIST_FORMS.DESCRIPTION,
+        inputSchema: z.object({
+          filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FORMS_FILTER),
+        }),
       },
-      async () => {
+      async ({ filter }) => {
         try {
-          const forms = await client.listForms();
+          const forms = await client.listForms(pickDefined({ filter }));
           return {
             content: [
               {

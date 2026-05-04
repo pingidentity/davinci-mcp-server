@@ -90,8 +90,20 @@ describe('FlowVersionsClient', () => {
 
     const result = await client.getFlowVersionDetails('flow-123', '3');
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123/versions/3/details');
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123/versions/3/details', {
+      params: undefined,
+    });
     expect(result).toEqual(mockDetails);
+  });
+
+  it('should forward query params to getFlowVersionDetails when provided', async () => {
+    axiosInstance.get.mockResolvedValue({ data: {} });
+
+    await client.getFlowVersionDetails('flow-123', '3', { expand: 'skcomponents' });
+
+    expect(axiosInstance.get).toHaveBeenCalledWith('/flows/flow-123/versions/3/details', {
+      params: { expand: 'skcomponents' },
+    });
   });
 
   it('should propagate errors from listFlowVersions', async () => {

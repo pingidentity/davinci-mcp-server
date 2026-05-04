@@ -2,9 +2,6 @@
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that provides AI assistants with seamless access to PingOne's DaVinci identity orchestration platform resources. This server enables AI models to interact with DaVinci flows, applications, connectors, variables, and forms through a standardized interface.
 
-> [!CAUTION]
-> **PREVIEW SOFTWARE:** This MCP server is currently in preview. It is provided "AS IS" without warranty of any kind. It is subject to change and is not advised for use in production or mission-critical workloads.
-
 > [!WARNING]
 > **SECURITY & LEAST PRIVILEGE:** This server grants an AI model significant access to your DaVinci environment configuration. All data returned from tools may be sent to the LLM provider.
 >
@@ -42,17 +39,17 @@ The server provides the following MCP tools under the `davinci_admin` collection
 
 | Tool                    | Description                                                                                       |
 | ----------------------- | ------------------------------------------------------------------------------------------------- |
-| `list_flows`            | Returns a list of all DaVinci flows in the environment.                                           |
-| `describe_flow`         | Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. |
+| `list_flows`            | Returns a list of all DaVinci flows. Supports `attributes` to project the response to specific top-level fields. Flow type is derived from the `trigger` field: no trigger = standard flow; `trigger.type` `AUTHENTICATION` = PingOne flow; `trigger.type` `AUTHENTICATION` + `trigger.subtype` `CIBA` = CIBA flow; `trigger.type` `SCHEDULE` = scheduled flow; `trigger.type` `BATCH_PROCESSING_SUBFLOW` = batch processing subflow. `readOnly: true` means the flow is read-only. |
+| `describe_flow`         | Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Supports `attributes` to project the response to specific top-level fields. See `list_flows` for flow type derivation. |
 | `list_flow_versions`    | Returns all versions of a specific DaVinci flow.                                                  |
-| `describe_flow_version` | Returns the complete definition of a specific DaVinci flow version.                                |
+| `describe_flow_version` | Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Supports `expand` to include related fields inline (e.g. `skcomponents`). |
 
 #### Connector Tools
 
 | Tool                          | Description                                                                          |
 | ----------------------------- | ------------------------------------------------------------------------------------ |
 | `list_connectors`             | Returns a list of all available DaVinci connector types from the catalog.             |
-| `describe_connector`          | Returns the full details of a single DaVinci connector type by ID.                   |
+| `describe_connector`          | Returns the full details of a single DaVinci connector type by ID, including metadata, capabilities, configurable properties, and required credentials. |
 | `list_connector_instances`    | Returns a list of all deployed DaVinci connector instances.                          |
 | `describe_connector_instance` | Returns details of a single deployed DaVinci connector instance by ID.               |
 
@@ -60,15 +57,15 @@ The server provides the following MCP tools under the `davinci_admin` collection
 
 | Tool                | Description                                       |
 | ------------------- | ------------------------------------------------- |
-| `list_variables`    | Returns a list of all DaVinci variables.          |
+| `list_variables`    | Returns a list of all DaVinci variables. Supports `limit` (1–50), `cursor` for pagination, and a SCIM `filter` to narrow results. |
 | `describe_variable` | Returns details of a single DaVinci variable by ID. |
 
 #### Form Tools
 
 | Tool            | Description                                          |
 | --------------- | ---------------------------------------------------- |
-| `list_forms`    | Returns a list of all DaVinci forms.                 |
-| `describe_form` | Returns full configuration of a single DaVinci form. |
+| `list_forms`    | Returns a list of all DaVinci forms. Use for discovery and finding form IDs. Use describe_form for field-level details. Supports a SCIM `filter` on `category` (eq). |
+| `describe_form` | Returns full configuration of a single DaVinci form including fields and layout. |
 
 ### Authentication
 

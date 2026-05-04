@@ -17,8 +17,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS } from '../utils/constants.js';
-import { requiredId } from '../utils/schemas.js';
+import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
+import { optionalString, pickDefined, requiredId } from '../utils/schemas.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FlowsClient } from '../modules/auth/clients/flows.js';
 import { AuthManager } from '../modules/auth/manager.js';
@@ -53,10 +53,13 @@ export function registerFlowTools(
       MCP_TOOLS.LIST_FLOWS.NAME,
       {
         description: MCP_TOOLS.LIST_FLOWS.DESCRIPTION,
+        inputSchema: z.object({
+          attributes: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_ATTRIBUTES),
+        }),
       },
-      async () => {
+      async ({ attributes }) => {
         try {
-          const flows = await flowsClient.listFlows();
+          const flows = await flowsClient.listFlows(pickDefined({ attributes }));
           return {
             content: [{ type: 'text', text: JSON.stringify(flows) }],
           };
@@ -80,11 +83,12 @@ export function registerFlowTools(
         description: MCP_TOOLS.DESCRIBE_FLOW.DESCRIPTION,
         inputSchema: z.object({
           flowId: requiredId('flowId'),
+          attributes: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_ATTRIBUTES),
         }),
       },
-      async ({ flowId }) => {
+      async ({ flowId, attributes }) => {
         try {
-          const flow = await flowsClient.getFlow(flowId);
+          const flow = await flowsClient.getFlow(flowId, pickDefined({ attributes }));
           return {
             content: [{ type: 'text', text: JSON.stringify(flow) }],
           };

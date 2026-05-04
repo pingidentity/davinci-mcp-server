@@ -149,10 +149,25 @@ describe('registerFormTools', () => {
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_FORMS.NAME,
+      arguments: {},
     });
 
-    expect(mockFormsClient.listForms).toHaveBeenCalled();
+    expect(mockFormsClient.listForms).toHaveBeenCalledWith(undefined);
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockData) }]);
+  });
+
+  it('should forward filter query param to list_forms', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockFormsClient.listForms.mockResolvedValue([]);
+
+    await client.callTool({
+      name: MCP_TOOLS.LIST_FORMS.NAME,
+      arguments: { filter: 'category eq "CUSTOM"' },
+    });
+
+    expect(mockFormsClient.listForms).toHaveBeenCalledWith({
+      filter: 'category eq "CUSTOM"',
+    });
   });
 
   it('should return an error when list_forms fails with generic error', async () => {
@@ -161,6 +176,7 @@ describe('registerFormTools', () => {
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_FORMS.NAME,
+      arguments: {},
     });
 
     expect(result.isError).toBe(true);
@@ -174,6 +190,7 @@ describe('registerFormTools', () => {
 
     const result = await client.callTool({
       name: MCP_TOOLS.LIST_FORMS.NAME,
+      arguments: {},
     });
 
     expect(result.isError).toBe(true);

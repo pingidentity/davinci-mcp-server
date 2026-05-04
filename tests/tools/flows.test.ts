@@ -144,7 +144,20 @@ describe('registerFlowTools', () => {
 
     const result = await client.callTool({ name: MCP_TOOLS.LIST_FLOWS.NAME, arguments: {} });
 
+    expect(mockFlowsClient.listFlows).toHaveBeenCalledWith(undefined);
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockData) }]);
+  });
+
+  it('should forward attributes query param to list_flows', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockFlowsClient.listFlows.mockResolvedValue([]);
+
+    await client.callTool({
+      name: MCP_TOOLS.LIST_FLOWS.NAME,
+      arguments: { attributes: 'id,name' },
+    });
+
+    expect(mockFlowsClient.listFlows).toHaveBeenCalledWith({ attributes: 'id,name' });
   });
 
   it('should throw McpError when list_flows fails with generic error', async () => {
@@ -179,8 +192,32 @@ describe('registerFlowTools', () => {
       arguments: { flowId: 'flow-123' },
     });
 
-    expect(mockFlowsClient.getFlow).toHaveBeenCalledWith('flow-123');
+    expect(mockFlowsClient.getFlow).toHaveBeenCalledWith('flow-123', undefined);
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(mockFlow) }]);
+  });
+
+  it('should forward attributes query param to describe_flow', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockFlowsClient.getFlow.mockResolvedValue({});
+
+    await client.callTool({
+      name: MCP_TOOLS.DESCRIBE_FLOW.NAME,
+      arguments: { flowId: 'flow-123', attributes: 'id,name' },
+    });
+
+    expect(mockFlowsClient.getFlow).toHaveBeenCalledWith('flow-123', { attributes: 'id,name' });
+  });
+
+  it('should forward only provided params to describe_flow (partial combination)', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    mockFlowsClient.getFlow.mockResolvedValue({});
+
+    await client.callTool({
+      name: MCP_TOOLS.DESCRIBE_FLOW.NAME,
+      arguments: { flowId: 'flow-123' },
+    });
+
+    expect(mockFlowsClient.getFlow).toHaveBeenCalledWith('flow-123', undefined);
   });
 
   it('should throw McpError when describe_flow fails with generic error', async () => {
