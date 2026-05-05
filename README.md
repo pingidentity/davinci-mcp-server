@@ -14,8 +14,8 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that pr
 DaVinci is PingOne's no-code identity orchestration platform that allows organizations to build sophisticated identity and access management workflows. This MCP server acts as a bridge between MCP-compatible AI assistants and the DaVinci API, enabling:
 
 - **Flow Management**: List and inspect identity orchestration flows and their versions.
-- **Flow Validation**: Check flow configurations for errors and deployment readiness
-- **Flow Execution Monitoring**: View execution history and troubleshoot flow runs
+- **Flow Validation**: Check flow configuration errors and deployment readiness.
+- **Flow Execution Monitoring**: Monitor flow executions, review execution history, and troubleshoot failures.
 - **Application Configuration**: Access application settings and flow policies.
 - **Connector Management**: View available connectors and their configurations.
 - **Variable Management**: Manage flow variables and their values.
@@ -45,9 +45,9 @@ The server provides the following MCP tools under the `davinci_admin` collection
 | `describe_flow`         | Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Supports `attributes` to project the response to specific top-level fields. See `list_flows` for flow type derivation. |
 | `list_flow_versions`    | Returns all versions of a specific DaVinci flow.                                                  |
 | `describe_flow_version` | Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Supports `expand` to include related fields inline (e.g. `skcomponents`). |
-| `validate_flow`         | Validates a flow configuration and checks if it is ready for deployment. Returns any errors or warnings. |
-| `list_flow_executions`  | Returns a list of all executions for a specific flow in the last 30 days                           |
-| `summarize_flow_execution` | Returns detailed execution events and a summary for a specific flow run, including any errors encountered during execution. |
+| `validate_flow`         | Checks a flow configuration for errors and verifies deployment readiness. Returns any issues found. |
+| `list_flow_executions`  | Returns all executions for a specific DaVinci flow. |
+| `summarize_flow_execution` | Returns a detailed summary and event log for a specific flow execution, highlighting any errors or failures, encountered during execution. |
 
 #### Connector Tools
 
