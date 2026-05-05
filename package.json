@@ -1,6 +1,6 @@
 {
   "name": "@ping-identity/davinci-mcp-server",
-  "version": "0.1.0-beta.6",
+  "version": "0.1.0",
   "description": "A Model Context Protocol (MCP) server for PingOne DaVinci",
   "type": "module",
   "main": "dist/index.js",
