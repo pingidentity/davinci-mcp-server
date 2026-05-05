@@ -17,7 +17,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
+import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS, FLOW_EXPAND_VALUES } from '../utils/constants.js';
 import { optionalString, pickDefined, requiredId, optionalInt } from '../utils/schemas.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FlowsClient } from '../modules/auth/clients/flows.js';
@@ -46,7 +46,15 @@ export function registerFlowTools(
   const includeFlowExecutions = isIncluded(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
   const includeFlowExecutionEvents = isIncluded(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
 
-  if (!includeListFlows && !includeDescribeFlow) return;
+  if (
+    !includeListFlows &&
+    !includeDescribeFlow &&
+    !includeValidateFlow &&
+    !includeFlowExecutions &&
+    !includeFlowExecutionEvents
+  ) {
+    return;
+  }
 
   const flowsClient = new FlowsClient(authManager);
 
@@ -90,9 +98,9 @@ export function registerFlowTools(
           expand: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_EXPAND),
         }),
       },
-      async ({ flowId, attributes }) => {
+      async ({ flowId, attributes, expand }) => {
         try {
-          const flow = await flowsClient.getFlow(flowId, pickDefined({ attributes }));
+          const flow = await flowsClient.getFlow(flowId, pickDefined({ attributes, expand }));
           return {
             content: [{ type: 'text', text: JSON.stringify(flow) }],
           };
@@ -121,7 +129,9 @@ export function registerFlowTools(
       async ({ flowId }) => {
         try {
           await flowsClient.validateFlow(flowId);
-          const flow = await flowsClient.getFlow(flowId, { expand: 'dvlinterDetails' });
+          const flow = await flowsClient.getFlow(flowId, {
+            expand: FLOW_EXPAND_VALUES.DVLINTER_DETAILS,
+          });
           return {
             content: [{ type: 'text', text: JSON.stringify(flow) }],
           };
@@ -148,7 +158,7 @@ export function registerFlowTools(
           cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_CURSOR),
           filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_FILTER),
           limit: optionalInt({
-            min: 100,
+            min: 1,
             max: 500,
             description: QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_LIMIT,
           }),
@@ -190,7 +200,7 @@ export function registerFlowTools(
           cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_CURSOR),
           filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_FILTER),
           limit: optionalInt({
-            min: 100,
+            min: 1,
             max: 500,
             description: QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_LIMIT,
           }),

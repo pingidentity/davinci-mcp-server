@@ -245,6 +245,13 @@ export const QUERY_PARAM_DESCRIPTIONS = {
     'Optional. SCIM filter to narrow results. Supports: timestamp ge "ISO8601", timestamp le "ISO8601". Combine with and/or operators. Example: timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-05-01T00:00:00Z".',
 } as const;
 
+/**
+ * Valid values for flow expand query parameters.
+ */
+export const FLOW_EXPAND_VALUES = {
+  DVLINTER_DETAILS: 'dvlinterDetails',
+} as const;
+
 export const AUTH_PORT = 7474;
 export const REDIRECT_URI = `http://127.0.0.1:${AUTH_PORT}/callback`;
 export const AUTH_TIMEOUT_MS = 300_000;

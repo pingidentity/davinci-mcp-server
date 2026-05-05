@@ -136,6 +136,81 @@ describe('registerFlowTools', () => {
     expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
   });
 
+  it('should register validate_flow, list_flow_executions, and summarize_flow_execution when list_flows and describe_flow are excluded', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      excludeTools: [MCP_TOOLS.LIST_FLOWS.NAME, MCP_TOOLS.DESCRIBE_FLOW.NAME],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should register only validate_flow when other tools are excluded', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      excludeTools: [
+        MCP_TOOLS.LIST_FLOWS.NAME,
+        MCP_TOOLS.DESCRIBE_FLOW.NAME,
+        MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
+        MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME,
+      ],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should register only list_flow_executions when other tools are excluded', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      excludeTools: [
+        MCP_TOOLS.LIST_FLOWS.NAME,
+        MCP_TOOLS.DESCRIBE_FLOW.NAME,
+        MCP_TOOLS.VALIDATE_FLOW.NAME,
+        MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME,
+      ],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should register only summarize_flow_execution when other tools are excluded', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      excludeTools: [
+        MCP_TOOLS.LIST_FLOWS.NAME,
+        MCP_TOOLS.DESCRIBE_FLOW.NAME,
+        MCP_TOOLS.VALIDATE_FLOW.NAME,
+        MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
+      ],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
   it('should register no tools when all are excluded', () => {
     const registerToolSpy = vi.fn();
     server = new McpServer({ name: 'test', version: '0.0.1' });

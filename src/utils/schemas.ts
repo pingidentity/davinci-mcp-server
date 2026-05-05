@@ -29,6 +29,7 @@ const PARAM_DESCRIPTIONS: Record<string, string> = {
   flowPolicyId: 'The ID of the flow policy',
   variableId: 'The ID of the variable',
   formId: 'The ID of the form',
+  interactionId: 'The ID of the flow interaction/execution',
 };
 
 /**
