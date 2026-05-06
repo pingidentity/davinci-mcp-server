@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import pkg from '../../package.json' with { type: 'json' };
 
 export const MCP_SERVER_NAME = 'davinci-mcp-server';
-export const MCP_SERVER_VERSION = '0.1.0';
+export const MCP_SERVER_VERSION = pkg.version;
 
 export const HELP_TEXT = `
 ${MCP_SERVER_NAME} v${MCP_SERVER_VERSION}
@@ -73,9 +74,13 @@ export const CLI_ARG_OPTIONS = {
  */
 export const COLLECTION_NAMES = {
   DAVINCI_ADMIN: 'davinci_admin',
+  DAVINCI_FLOW_TROUBLESHOOTING: 'davinci_flow_troubleshooting',
 } as const;
 
 const DAVINCI_ADMIN_COLLECTIONS = [COLLECTION_NAMES.DAVINCI_ADMIN] as const;
+const DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS = [
+  COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING,
+] as const;
 
 /**
  * Registry of all MCP tools exposed by the DaVinci server.
@@ -167,7 +172,7 @@ export const MCP_TOOLS = {
   DESCRIBE_FLOW: {
     NAME: 'describe_flow',
     DESCRIPTION:
-      "Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow's internal logic. Call list_flows first to find the ID. Supports `attributes` to project the response to specific top-level fields. See list_flows for flow type derivation.",
+      'Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow\'s internal logic. Call list_flows first to find the ID. Supports `attributes` to project the response to specific top-level fields and `expand` to include related fields inline (e.g. "dvlinterDetails"). See list_flows for flow type derivation.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FLOW_VERSIONS: {
@@ -181,6 +186,24 @@ export const MCP_TOOLS = {
     DESCRIPTION:
       'Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Use when you need to inspect or compare a historical version of a flow. Call list_flows then list_flow_versions first to find the required IDs. Supports `expand` to include related fields inline (e.g. "skcomponents").',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+  },
+  VALIDATE_FLOW: {
+    NAME: 'validate_flow',
+    DESCRIPTION:
+      'Validates a DaVinci flow configuration using the DVLinter validation engine. Use this tool to check deployment readiness, identify configuration errors and warnings (best-practice violations), and troubleshoot flow issues. Analyzes nodes (connectors and capabilities), connections (connector instances), node properties, and overall structure. Returns validation results including error counts or warning counts, and specific issue descriptions. Error locations: (1) `linterError` property within each node in graphData.elements.nodes for node specific issues (2) `allLinterErrors` property in graphData for all flow-level errors and warnings. Zero errors indicates deployment-ready status. This is a read-only operation that does not modify the flow. Use list_flows to obtain the flow ID if needed.',
+    COLLECTION_NAMES: DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS,
+  },
+  LIST_FLOW_EXECUTIONS: {
+    NAME: 'list_flow_executions',
+    DESCRIPTION:
+      'Returns a list of all executions for a specific DaVinci flow. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow executions. Use list_flows to obtain the flow ID, if needed. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates, `transactionId` (eq) for specific transaction details.',
+    COLLECTION_NAMES: DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS,
+  },
+  SUMMARIZE_FLOW_EXECUTION: {
+    NAME: 'summarize_flow_execution',
+    DESCRIPTION:
+      'Returns detailed information about a specific DaVinci flow execution with status (success/failure), timestamps, input/output data, errors with stack traces, and user context. Use this tool to debug failures, summarize flow execution results, analyze execution behavior, verify data transformations, or investigate user-specific issues. Use list_flows to get flow ID, then list_flow_executions to get execution ID, if needed. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates.',
+    COLLECTION_NAMES: DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS,
   },
 } as const;
 
@@ -201,6 +224,8 @@ export type ToolName = (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES];
 export const QUERY_PARAM_DESCRIPTIONS = {
   FLOWS_ATTRIBUTES:
     'Optional. Comma-separated list of top-level FlowResponse attributes to return (other attributes are omitted).',
+  FLOWS_EXPAND:
+    'Optional. Comma-separated list of related resources to expand inline in the response (e.g. "dvlinterDetails" to include linter details in flow response).',
   FLOW_VERSION_EXPAND:
     'Optional. Comma-separated list of fields to expand in the version details response (e.g. "skcomponents").',
   VARIABLES_LIMIT:
@@ -211,6 +236,25 @@ export const QUERY_PARAM_DESCRIPTIONS = {
     'Optional. SCIM filter (RFC 7644 Section 3.4.2.2). Filterable attributes and the comparison operators supported per attribute: context (eq, sw, co, ew), name (eq, sw, co, ew), createdAt (eq, gt, ge, lt, le), updatedAt (eq, gt, ge, lt, le). Clauses may be combined with the logical operators `and` and `or`.',
   FORMS_FILTER:
     'Optional. SCIM filter on category using eq operator. Valid values: PROGRESSIVE_PROFILING, SELF_SERVICE, CUSTOM, EXPERIENCES. Example: category eq "CUSTOM".',
+  FLOW_EXECUTIONS_LIMIT:
+    'Optional. Maximum number of flow executions to return per page (1-500, default is 500 when omitted).',
+  FLOW_EXECUTIONS_CURSOR:
+    'Optional. Opaque pagination cursor from the "next" link of a previous response.',
+  FLOW_EXECUTIONS_FILTER:
+    'Optional. SCIM filter to narrow results. Supports: transactionId eq "value", timestamp ge "ISO8601", timestamp le "ISO8601". Combine with and/or operators. Example: timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-05-01T00:00:00Z".',
+  FLOW_EXECUTION_EVENTS_LIMIT:
+    'Optional. Maximum number of flow execution events to return per page (1-500, default is 500 when omitted).',
+  FLOW_EXECUTION_EVENTS_CURSOR:
+    'Optional. Opaque pagination cursor from the "next" link of a previous response.',
+  FLOW_EXECUTION_EVENTS_FILTER:
+    'Optional. SCIM filter to narrow results. Supports: timestamp ge "ISO8601", timestamp le "ISO8601". Combine with and/or operators. Example: timestamp ge "2026-04-01T00:00:00Z" and timestamp le "2026-05-01T00:00:00Z".',
+} as const;
+
+/**
+ * Valid values for flow expand query parameters.
+ */
+export const FLOW_EXPAND_VALUES = {
+  DVLINTER_DETAILS: 'dvlinterDetails',
 } as const;
 
 export const AUTH_PORT = 7474;
@@ -221,4 +265,8 @@ export const AUTH_CODE_MAX_LENGTH = 2048;
 export const OS_KEYCHAIN = {
   SERVICE_NAME: 'davinci-mcp-server',
   ACCOUNT_NAME: 'davinci-tokens',
+} as const;
+
+export const CUSTOM_CONTENT_TYPES = {
+  FLOW_VALIDATE: 'application/vnd.pingidentity.flow.validate+json',
 } as const;

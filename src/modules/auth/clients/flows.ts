@@ -16,6 +16,7 @@
 
 import { QueryParams } from '../../../types/index.js';
 import { DaVinciApiClient } from './davinci.js';
+import { CUSTOM_CONTENT_TYPES } from '../../../utils/constants.js';
 
 /**
  * Client for managing and querying DaVinci flows.
@@ -41,10 +42,58 @@ export class FlowsClient extends DaVinciApiClient {
    * @param params - Optional query parameters.
    * @param params.attributes - Comma-separated list of top-level FlowResponse
    *   attributes to include in the response.
+   * @param params.expand - Comma-separated list of related resources to expand in the response.
    * @returns A promise that resolves to the flow details.
    */
   async getFlow(flowId: string, params?: QueryParams) {
     const response = await this.axiosInstance.get(`/flows/${flowId}`, { params });
+    return response.data;
+  }
+
+  /**
+   * Validates a specific flow configuration.
+   *
+   * @param flowId - The ID of the flow to validate.
+   * @returns A promise that resolves to the validation results.
+   */
+  async validateFlow(flowId: string) {
+    const response = await this.axiosInstance.post(`/flows/${flowId}`, null, {
+      headers: { 'content-type': CUSTOM_CONTENT_TYPES.FLOW_VALIDATE },
+    });
+    return response.data;
+  }
+
+  /**
+   * Retrieves the execution history of a specific flow.
+   *
+   * @param flowId - The ID of the flow to retrieve executions for.
+   * @param params - Optional query parameters.
+   * @param params.limit - Optional maximum number of executions to return.
+   * @param params.cursor - Optional pagination cursor for fetching the next page of results.
+   * @param params.filter - Optional SCIM filter expression to filter executions by timestamp and transactionId.
+   * @returns A promise that resolves to the list of flow executions.
+   */
+  async getFlowExecutions(flowId: string, params?: QueryParams) {
+    const response = await this.axiosInstance.get(`/flows/${flowId}/interactions`, { params });
+    return response.data;
+  }
+
+  /**
+   * Retrieves the execution events for a specific flow interaction.
+   *
+   * @param flowId - The ID of the flow.
+   * @param interactionId - The ID of the interaction to retrieve events for.
+   * @param params - Optional query parameters.
+   * @param params.limit - Optional maximum number of events to return.
+   * @param params.cursor - Optional pagination cursor for fetching the next page of results.
+   * @param params.filter - Optional SCIM filter expression to filter events by timestamp and transactionId.
+   * @returns A promise that resolves to the list of flow execution events.
+   */
+  async getFlowExecutionEvents(flowId: string, interactionId: string, params?: QueryParams) {
+    const response = await this.axiosInstance.get(
+      `/flows/${flowId}/interactions/${interactionId}/events`,
+      { params },
+    );
     return response.data;
   }
 }

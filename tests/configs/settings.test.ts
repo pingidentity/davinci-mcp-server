@@ -23,11 +23,13 @@ describe('createToolFilter', () => {
   it('should include all tools when no filters are set', () => {
     const filter = createToolFilter({});
     expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(true);
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(true);
   });
 
   it('should include all tools when config is undefined', () => {
     const filter = createToolFilter();
     expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(true);
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(true);
   });
 
   // --- includeTools ---
@@ -125,6 +127,78 @@ describe('createToolFilter', () => {
       excludeTools: ['list_flows'],
     });
     expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(false);
+  });
+
+  // --- davinci_flow_troubleshooting collection tests ---
+
+  it('should include tools belonging to davinci_flow_troubleshooting collection', () => {
+    const filter = createToolFilter({
+      includeCollections: [COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING],
+    });
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(true);
+    expect(filter(TOOL_NAMES.LIST_FLOW_EXECUTIONS)).toBe(true);
+    expect(filter(TOOL_NAMES.SUMMARIZE_FLOW_EXECUTION)).toBe(true);
+  });
+
+  it('should exclude tools not in davinci_flow_troubleshooting collection', () => {
+    const filter = createToolFilter({
+      includeCollections: [COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING],
+    });
+    expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(false);
+    expect(filter(TOOL_NAMES.DESCRIBE_FLOW)).toBe(false);
+    expect(filter(TOOL_NAMES.LIST_APPLICATIONS)).toBe(false);
+  });
+
+  it('should exclude davinci_flow_troubleshooting tools when collection is excluded', () => {
+    const filter = createToolFilter({
+      excludeCollections: [COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING],
+    });
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(false);
+    expect(filter(TOOL_NAMES.LIST_FLOW_EXECUTIONS)).toBe(false);
+    expect(filter(TOOL_NAMES.SUMMARIZE_FLOW_EXECUTION)).toBe(false);
+  });
+
+  it('should include davinci_admin tools when davinci_flow_troubleshooting is excluded', () => {
+    const filter = createToolFilter({
+      excludeCollections: [COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING],
+    });
+    expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(true);
+    expect(filter(TOOL_NAMES.DESCRIBE_FLOW)).toBe(true);
+    expect(filter(TOOL_NAMES.LIST_APPLICATIONS)).toBe(true);
+  });
+
+  it('should include both collections when both are in includeCollections', () => {
+    const filter = createToolFilter({
+      includeCollections: [
+        COLLECTION_NAMES.DAVINCI_ADMIN,
+        COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING,
+      ],
+    });
+    expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(true);
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(true);
+    expect(filter(TOOL_NAMES.LIST_FLOW_EXECUTIONS)).toBe(true);
+  });
+
+  it('should exclude all tools when both collections are excluded', () => {
+    const filter = createToolFilter({
+      excludeCollections: [
+        COLLECTION_NAMES.DAVINCI_ADMIN,
+        COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING,
+      ],
+    });
+    expect(filter(TOOL_NAMES.LIST_FLOWS)).toBe(false);
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(false);
+    expect(filter(TOOL_NAMES.LIST_APPLICATIONS)).toBe(false);
+  });
+
+  it('should apply tool-level filter on top of davinci_flow_troubleshooting collection filter', () => {
+    const filter = createToolFilter({
+      includeCollections: [COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING],
+      excludeTools: [TOOL_NAMES.VALIDATE_FLOW],
+    });
+    expect(filter(TOOL_NAMES.VALIDATE_FLOW)).toBe(false);
+    expect(filter(TOOL_NAMES.LIST_FLOW_EXECUTIONS)).toBe(true);
+    expect(filter(TOOL_NAMES.SUMMARIZE_FLOW_EXECUTION)).toBe(true);
   });
 });
 

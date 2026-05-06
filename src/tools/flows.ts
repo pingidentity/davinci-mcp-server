@@ -17,8 +17,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { McpServerConfig } from '../types/index.js';
-import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS } from '../utils/constants.js';
-import { optionalString, pickDefined, requiredId } from '../utils/schemas.js';
+import { MCP_TOOLS, QUERY_PARAM_DESCRIPTIONS, FLOW_EXPAND_VALUES } from '../utils/constants.js';
+import { optionalString, pickDefined, requiredId, optionalInt } from '../utils/schemas.js';
 import { createToolFilter } from '../configs/settings.js';
 import { FlowsClient } from '../modules/auth/clients/flows.js';
 import { AuthManager } from '../modules/auth/manager.js';
@@ -42,8 +42,19 @@ export function registerFlowTools(
   const isIncluded = createToolFilter(config);
   const includeListFlows = isIncluded(MCP_TOOLS.LIST_FLOWS.NAME);
   const includeDescribeFlow = isIncluded(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+  const includeValidateFlow = isIncluded(MCP_TOOLS.VALIDATE_FLOW.NAME);
+  const includeFlowExecutions = isIncluded(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+  const includeFlowExecutionEvents = isIncluded(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
 
-  if (!includeListFlows && !includeDescribeFlow) return;
+  if (
+    !includeListFlows &&
+    !includeDescribeFlow &&
+    !includeValidateFlow &&
+    !includeFlowExecutions &&
+    !includeFlowExecutionEvents
+  ) {
+    return;
+  }
 
   const flowsClient = new FlowsClient(authManager);
 
@@ -84,11 +95,12 @@ export function registerFlowTools(
         inputSchema: z.object({
           flowId: requiredId('flowId'),
           attributes: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_ATTRIBUTES),
+          expand: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOWS_EXPAND),
         }),
       },
-      async ({ flowId, attributes }) => {
+      async ({ flowId, attributes, expand }) => {
         try {
-          const flow = await flowsClient.getFlow(flowId, pickDefined({ attributes }));
+          const flow = await flowsClient.getFlow(flowId, pickDefined({ attributes, expand }));
           return {
             content: [{ type: 'text', text: JSON.stringify(flow) }],
           };
@@ -98,6 +110,120 @@ export function registerFlowTools(
           throw new McpError(
             ErrorCode.InternalError,
             `Failed to describe flow: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeValidateFlow) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.VALIDATE_FLOW.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.VALIDATE_FLOW.NAME,
+      {
+        description: MCP_TOOLS.VALIDATE_FLOW.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+        }),
+      },
+      async ({ flowId }) => {
+        try {
+          await flowsClient.validateFlow(flowId);
+          const flow = await flowsClient.getFlow(flowId, {
+            expand: FLOW_EXPAND_VALUES.DVLINTER_DETAILS,
+          });
+          return {
+            content: [{ type: 'text', text: JSON.stringify(flow) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.VALIDATE_FLOW.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to validate flow: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeFlowExecutions) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME,
+      {
+        description: MCP_TOOLS.LIST_FLOW_EXECUTIONS.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+          cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_CURSOR),
+          filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_FILTER),
+          limit: optionalInt({
+            min: 1,
+            max: 500,
+            description: QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTIONS_LIMIT,
+          }),
+        }),
+      },
+      async ({ flowId, limit, cursor, filter }) => {
+        try {
+          const params = pickDefined({
+            limit: limit ?? 500,
+            filter,
+            cursor,
+          });
+
+          const executions = await flowsClient.getFlowExecutions(flowId, params);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(executions) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to list flow executions: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      },
+    );
+  }
+
+  if (includeFlowExecutionEvents) {
+    logger.debug(`[Tools] Registering tool: ${MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME}`);
+    server.registerTool(
+      MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME,
+      {
+        description: MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.DESCRIPTION,
+        inputSchema: z.object({
+          flowId: requiredId('flowId'),
+          interactionId: requiredId('interactionId'),
+          cursor: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_CURSOR),
+          filter: optionalString(QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_FILTER),
+          limit: optionalInt({
+            min: 1,
+            max: 500,
+            description: QUERY_PARAM_DESCRIPTIONS.FLOW_EXECUTION_EVENTS_LIMIT,
+          }),
+        }),
+      },
+      async ({ flowId, interactionId, limit, cursor, filter }) => {
+        try {
+          const params = pickDefined({
+            limit: limit ?? 500,
+            filter,
+            cursor,
+          });
+
+          const events = await flowsClient.getFlowExecutionEvents(flowId, interactionId, params);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(events) }],
+          };
+        } catch (error) {
+          logger.error(`Error in tool ${MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME}:`, error);
+          if (error instanceof McpError) throw error;
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to get flow execution events: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
       },
