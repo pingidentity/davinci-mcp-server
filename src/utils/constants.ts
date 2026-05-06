@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import pkg from '../../package.json' with { type: 'json' };
 
 export const MCP_SERVER_NAME = 'davinci-mcp-server';
-export const MCP_SERVER_VERSION = '0.1.0';
+export const MCP_SERVER_VERSION = pkg.version;
 
 export const HELP_TEXT = `
 ${MCP_SERVER_NAME} v${MCP_SERVER_VERSION}
