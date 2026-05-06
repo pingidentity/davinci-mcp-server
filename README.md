@@ -26,9 +26,13 @@ DaVinci is PingOne's no-code identity orchestration platform that allows organiz
 
 ### Available Tools
 
-The server provides the following MCP tools under the `davinci_admin` collection:
+The server provides the following MCP tools organized into two collections:
 
-#### Application Tools
+#### Collection: `davinci_admin`
+
+Core administrative tools for managing DaVinci resources (applications, flows, connectors, variables, forms).
+
+**Application Tools**
 
 | Tool                              | Description                                                                    |
 | --------------------------------- | ------------------------------------------------------------------------------ |
@@ -37,7 +41,7 @@ The server provides the following MCP tools under the `davinci_admin` collection
 | `list_application_flow_policies`  | Returns all flow policies for a DaVinci application.                           |
 | `describe_application_flow_policy` | Returns details of a single flow policy for a DaVinci application.             |
 
-#### Flow Tools
+**Flow Tools**
 
 | Tool                    | Description                                                                                       |
 | ----------------------- | ------------------------------------------------------------------------------------------------- |
@@ -45,11 +49,8 @@ The server provides the following MCP tools under the `davinci_admin` collection
 | `describe_flow`         | Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Supports `attributes` to project the response to specific top-level fields. See `list_flows` for flow type derivation. |
 | `list_flow_versions`    | Returns all versions of a specific DaVinci flow.                                                  |
 | `describe_flow_version` | Returns the complete definition of a specific DaVinci flow version, including the full node graph, edges, settings, and trigger configuration. Supports `expand` to include related fields inline (e.g. `skcomponents`). |
-| `validate_flow`         | Validates a DaVinci flow configuration using the DVLinter validation engine. Use this tool to check deployment readiness, identify configuration errors and warnings (best-practice violations), and troubleshoot flow issues. Analyzes nodes (connectors and capabilities), connections (connector instances), node properties, and overall structure. Returns validation results including error counts or warning counts, and specific issue descriptions. Error locations: (1) `linterError` property within each node in graphData.elements.nodes for node specific issues (2) `allLinterErrors` property in graphData for all flow-level errors and warnings. Zero errors indicates deployment-ready status. This is a read-only operation that does not modify the flow.|
-| `list_flow_executions`  | Returns a list of all executions for a specific DaVinci flow. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow executions. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates, `transactionId` (eq) for specific transaction details. |
-| `summarize_flow_execution` | Returns detailed information about a specific DaVinci flow execution with status (success/failure), timestamps, input/output data, errors with stack traces, and user context. Use this tool to debug failures, summarize flow execution results, analyze execution behavior, verify data transformations, or investigate user-specific issues. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates. |
 
-#### Connector Tools
+**Connector Tools**
 
 | Tool                          | Description                                                                          |
 | ----------------------------- | ------------------------------------------------------------------------------------ |
@@ -58,19 +59,31 @@ The server provides the following MCP tools under the `davinci_admin` collection
 | `list_connector_instances`    | Returns a list of all deployed DaVinci connector instances.                          |
 | `describe_connector_instance` | Returns details of a single deployed DaVinci connector instance by ID.               |
 
-#### Variable Tools
+**Variable Tools**
 
 | Tool                | Description                                       |
 | ------------------- | ------------------------------------------------- |
 | `list_variables`    | Returns a list of all DaVinci variables. Supports `limit` (1–50), `cursor` for pagination, and a SCIM `filter` to narrow results. |
 | `describe_variable` | Returns details of a single DaVinci variable by ID. |
 
-#### Form Tools
+**Form Tools**
 
 | Tool            | Description                                          |
 | --------------- | ---------------------------------------------------- |
 | `list_forms`    | Returns a list of all DaVinci forms. Use for discovery and finding form IDs. Use describe_form for field-level details. Supports a SCIM `filter` on `category` (eq). |
 | `describe_form` | Returns full configuration of a single DaVinci form including fields and layout. |
+
+#### Collection: `davinci_flow_troubleshooting`
+
+Specialized tools for flow validation, execution monitoring, and debugging.
+
+**Flow Troubleshooting Tools**
+
+| Tool                    | Description                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `validate_flow`         | Validates a DaVinci flow configuration using the DVLinter validation engine. Use this tool to check deployment readiness, identify configuration errors and warnings (best-practice violations), and troubleshoot flow issues. Analyzes nodes (connectors and capabilities), connections (connector instances), node properties, and overall structure. Returns validation results including error counts or warning counts, and specific issue descriptions. Error locations: (1) `linterError` property within each node in graphData.elements.nodes for node specific issues (2) `allLinterErrors` property in graphData for all flow-level errors and warnings. Zero errors indicates deployment-ready status. This is a read-only operation that does not modify the flow.|
+| `list_flow_executions`  | Returns a list of all executions for a specific DaVinci flow. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow executions. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates, `transactionId` (eq) for specific transaction details. |
+| `summarize_flow_execution` | Returns detailed information about a specific DaVinci flow execution with status (success/failure), timestamps, input/output data, errors with stack traces, and user context. Use this tool to debug failures, summarize flow execution results, analyze execution behavior, verify data transformations, or investigate user-specific issues. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates. |
 
 ### Authentication
 
@@ -274,7 +287,7 @@ The server requires a command to execute and supports several flags to customize
 
 #### Options
 
-- `--include-collections <list>`: Comma-separated list of collection names to include (e.g., `davinci_admin`).
+- `--include-collections <list>`: Comma-separated list of collection names to include (e.g., `davinci_admin`, `davinci_flow_troubleshooting`).
 - `--exclude-collections <list>`: Comma-separated list of collection names to exclude.
 - `--include-tools <list>`: Comma-separated list of tool names to include.
 - `--exclude-tools <list>`: Comma-separated list of tool names to exclude.
@@ -323,6 +336,34 @@ Limit the tools exposed to Claude to only those in the `davinci_admin` collectio
         "start",
         "--include-collections",
         "davinci_admin"
+      ],
+      "env": {
+        "DAVINCI_MCP_ENVIRONMENT_ID": "your-environment-id",
+        "AUTHORIZATION_CODE_CLIENT_ID": "your-client-id",
+        "ROOT_DOMAIN": "pingone.com"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>2a. Include Flow Troubleshooting Tools Only</b></summary>
+Expose only the flow troubleshooting and debugging tools.
+
+```json
+{
+  "mcpServers": {
+    "davinci": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@ping-identity/davinci-mcp-server",
+        "start",
+        "--include-collections",
+        "davinci_flow_troubleshooting"
       ],
       "env": {
         "DAVINCI_MCP_ENVIRONMENT_ID": "your-environment-id",

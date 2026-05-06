@@ -234,6 +234,112 @@ describe('registerFlowTools', () => {
     expect(registerToolSpy).not.toHaveBeenCalled();
   });
 
+  // --- Collection-level filtering ---
+
+  it('should register only davinci_admin tools when davinci_admin collection is included', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      includeCollections: ['davinci_admin'],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should register only davinci_flow_troubleshooting tools when that collection is included', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      includeCollections: ['davinci_flow_troubleshooting'],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should register all flow tools when both collections are included', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      includeCollections: ['davinci_admin', 'davinci_flow_troubleshooting'],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should exclude davinci_flow_troubleshooting tools when that collection is excluded', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      excludeCollections: ['davinci_flow_troubleshooting'],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should exclude davinci_admin tools when that collection is excluded', async () => {
+    await setupServerAndClient({
+      auth: mockAuth,
+      excludeCollections: ['davinci_admin'],
+    });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).not.toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
+  it('should register no flow tools when both collections are excluded', () => {
+    const registerToolSpy = vi.fn();
+    server = new McpServer({ name: 'test', version: '0.0.1' });
+    server.registerTool = registerToolSpy;
+    registerFlowTools(
+      server,
+      {
+        auth: mockAuth,
+        excludeCollections: ['davinci_admin', 'davinci_flow_troubleshooting'],
+      },
+      mockAuthManager,
+      logger,
+    );
+
+    expect(registerToolSpy).not.toHaveBeenCalled();
+  });
+
+  it('should register all tools when collections are not specified', async () => {
+    await setupServerAndClient({ auth: mockAuth });
+    const { tools } = await client.listTools();
+    const names = tools.map((t) => t.name);
+
+    expect(names).toContain(MCP_TOOLS.LIST_FLOWS.NAME);
+    expect(names).toContain(MCP_TOOLS.DESCRIBE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.VALIDATE_FLOW.NAME);
+    expect(names).toContain(MCP_TOOLS.LIST_FLOW_EXECUTIONS.NAME);
+    expect(names).toContain(MCP_TOOLS.SUMMARIZE_FLOW_EXECUTION.NAME);
+  });
+
   // --- list_flows tool ---
 
   it('should return flows from list_flows', async () => {

@@ -73,9 +73,11 @@ export const CLI_ARG_OPTIONS = {
  */
 export const COLLECTION_NAMES = {
   DAVINCI_ADMIN: 'davinci_admin',
+  DAVINCI_FLOW_TROUBLESHOOTING: 'davinci_flow_troubleshooting',
 } as const;
 
 const DAVINCI_ADMIN_COLLECTIONS = [COLLECTION_NAMES.DAVINCI_ADMIN] as const;
+const DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS = [COLLECTION_NAMES.DAVINCI_FLOW_TROUBLESHOOTING] as const;
 
 /**
  * Registry of all MCP tools exposed by the DaVinci server.
@@ -186,19 +188,19 @@ export const MCP_TOOLS = {
     NAME: 'validate_flow',
     DESCRIPTION:
       'Validates a DaVinci flow configuration using the DVLinter validation engine. Use this tool to check deployment readiness, identify configuration errors and warnings (best-practice violations), and troubleshoot flow issues. Analyzes nodes (connectors and capabilities), connections (connector instances), node properties, and overall structure. Returns validation results including error counts or warning counts, and specific issue descriptions. Error locations: (1) `linterError` property within each node in graphData.elements.nodes for node specific issues (2) `allLinterErrors` property in graphData for all flow-level errors and warnings. Zero errors indicates deployment-ready status. This is a read-only operation that does not modify the flow. Use list_flows to obtain the flow ID if needed.',
-    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+    COLLECTION_NAMES: DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS,
   },
   LIST_FLOW_EXECUTIONS: {
     NAME: 'list_flow_executions',
     DESCRIPTION:
       'Returns a list of all executions for a specific DaVinci flow. Use this tool to find execution IDs for troubleshooting, debugging, or monitoring flow executions. Use list_flows to obtain the flow ID, if needed. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates, `transactionId` (eq) for specific transaction details.',
-    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+    COLLECTION_NAMES: DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS,
   },
   SUMMARIZE_FLOW_EXECUTION: {
     NAME: 'summarize_flow_execution',
     DESCRIPTION:
       'Returns detailed information about a specific DaVinci flow execution with status (success/failure), timestamps, input/output data, errors with stack traces, and user context. Use this tool to debug failures, summarize flow execution results, analyze execution behavior, verify data transformations, or investigate user-specific issues. Use list_flows to get flow ID, then list_flow_executions to get execution ID, if needed. Supports `limit` (max 500) and `cursor` for pagination and SCIM `filter` on `timestamp` (ge, le) with ISO 8601 dates.',
-    COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
+    COLLECTION_NAMES: DAVINCI_FLOW_TROUBLESHOOTING_COLLECTIONS,
   },
 } as const;
 
