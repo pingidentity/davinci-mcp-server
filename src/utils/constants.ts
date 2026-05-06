@@ -172,7 +172,7 @@ export const MCP_TOOLS = {
   DESCRIBE_FLOW: {
     NAME: 'describe_flow',
     DESCRIPTION:
-      "Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow's internal logic. Call list_flows first to find the ID. Supports `attributes` to project the response to specific top-level fields. See list_flows for flow type derivation.",
+      'Returns the complete definition of a DaVinci flow including the full node graph, edges, and settings. Use when auditing or understanding a flow\'s internal logic. Call list_flows first to find the ID. Supports `attributes` to project the response to specific top-level fields and `expand` to include related fields inline (e.g. "dvlinterDetails"). See list_flows for flow type derivation.',
     COLLECTION_NAMES: DAVINCI_ADMIN_COLLECTIONS,
   },
   LIST_FLOW_VERSIONS: {
