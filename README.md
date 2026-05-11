@@ -516,13 +516,7 @@ npm ci
 
 ### 2. Available Scripts
 
-- `npm run dev`: Watch mode for development.
-- `npm run build`: Build the project.
-- `npm run typecheck`: Run TypeScript type checking.
-- `npm run lint`: Run ESLint.
-- `npm run format`: Format code with Prettier.
-- `npm run test`: Run tests using Vitest.
-- `npm run inspect`: Run with MCP Inspector for debugging.
+See the [Development Workflow](CONTRIBUTING.md#development-workflow) table in `CONTRIBUTING.md` for the full list of npm scripts.
 
 ## Troubleshooting
 
@@ -530,6 +524,10 @@ npm ci
 - **Keychain Access**: On Linux, ensure `libsecret` is installed for `keytar` to function. On macOS/Windows, it uses the native keychain.
 - **Authentication Timeout**: The browser login must be completed within 5 minutes.
 - **Invalid Tokens**: Use the `--logout` flag to clear corrupted or invalid tokens from the keychain.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on setting up the project, code style, adding new tools, writing tests, and submitting pull requests.
 
 ## License
 
